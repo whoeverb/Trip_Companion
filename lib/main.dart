@@ -818,13 +818,26 @@ class _DayNavBarState extends State<_DayNavBar> {
                             selected ? AppColors.teal : AppColors.cardBorder,
                       ),
                     ),
-                    child: Text(
-                      'Day ${i + 1}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: selected ? Colors.black : AppColors.inkSoft,
-                      ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Day ${i + 1}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: selected ? Colors.black : AppColors.inkSoft,
+                          ),
+                        ),
+                        Text(
+                          widget.days[i].date,
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            color: selected ? Colors.black : AppColors.inkSoft,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );
@@ -926,23 +939,38 @@ class _DayContentState extends State<_DayContent> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Text(
-                widget.day.date,
-                style: const TextStyle(
-                  fontSize: 24,
-                  color: AppColors.ink,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.5,
+        Container(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.cardBorder),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "TODAY'S DATE",
+                style: TextStyle(
+                  fontSize: 9,
+                  letterSpacing: 1.5,
+                  color: AppColors.muted,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                widget.day.date,
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: AppColors.ink,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 20),
         Wrap(
           spacing: 12,
           runSpacing: 12,
