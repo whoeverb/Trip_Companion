@@ -182,7 +182,6 @@ class _TripListScreenState extends State<TripListScreen> {
                           _slideRoute(
                             ItineraryScreen(
                               meta: trip,
-                              gradient: gradient,
                             ),
                           ),
                         ),
@@ -548,12 +547,10 @@ class _TripCard extends StatelessWidget {
 
 class ItineraryScreen extends StatefulWidget {
   final TripMeta meta;
-  final List<Color> gradient;
 
   const ItineraryScreen({
     super.key,
     required this.meta,
-    required this.gradient,
   });
 
   @override
