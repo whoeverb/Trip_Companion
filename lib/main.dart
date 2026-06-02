@@ -1001,17 +1001,17 @@ class _WeatherChip extends StatelessWidget {
   const _WeatherChip(
       {required this.city, required this.country, required this.tempF, required this.icon});
 
-  String _emoji(String code) {
+  Map<String, dynamic> _weatherStyle(String code) {
     final c = int.parse(code);
-    if (c == 0) return '☀️';
-    if (c <= 3) return '⛅';
-    if (c <= 48) return '🌫️';
-    if (c <= 67) return '🌧️';
-    if (c <= 77) return '❄️';
-    if (c <= 99) return '⛈️';
-    return '🌡️';
+    if (c == 0) return {'icon': Icons.wb_sunny_rounded, 'color': const Color(0xFFFFD700), 'bg': const Color(0x33FFD700)};
+    if (c >= 1 && c <= 3) return {'icon': Icons.wb_cloudy_rounded, 'color': const Color(0xFFB0BEC5), 'bg': const Color(0x33B0BEC5)};
+    if (c >= 4 && c <= 48) return {'icon': Icons.foggy, 'color': const Color(0xFF90A4AE), 'bg': const Color(0x3390A4AE)};
+    if (c >= 49 && c <= 67) return {'icon': Icons.grain_rounded, 'color': const Color(0xFF4A9EE8), 'bg': const Color(0x334A9EE8)};
+    if (c >= 68 && c <= 77) return {'icon': Icons.ac_unit_rounded, 'color': const Color(0xFFE0F7FA), 'bg': const Color(0x33E0F7FA)};
+    if (c >= 78 && c <= 99) return {'icon': Icons.thunderstorm_rounded, 'color': const Color(0xFF8B6FE8), 'bg': const Color(0x338B6FE8)};
+    return {'icon': Icons.wb_sunny_rounded, 'color': const Color(0xFFFFD700), 'bg': const Color(0x33FFD700)};
   }
-  
+
   String _desc(String code) {
     final c = int.parse(code);
     if (c == 0) return "Sunny";
@@ -1025,9 +1025,11 @@ class _WeatherChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tempC = ((tempF - 32) * 5 / 9).round();
+    final style = _weatherStyle(icon);
     return Container(
-      width: 120,
-      height: 130, // Increased height slightly to accommodate content
+      width: 140,
+      height: 160,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         color: AppColors.card,
@@ -1038,10 +1040,17 @@ class _WeatherChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(_emoji(icon), style: const TextStyle(fontSize: 28)),
-          const SizedBox(height: 4),
+          Container(
+            width: 48, height: 48,
+            decoration: BoxDecoration(
+              color: style['bg'],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(style['icon'], color: style['color'], size: 26),
+          ),
+          const SizedBox(height: 8),
           Text(
-            '${tempF.round()}°F',
+            '${tempF.round()}°F / ${tempC}°C',
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
