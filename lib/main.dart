@@ -280,6 +280,8 @@ class _SectionLabel extends StatelessWidget {
 // ─── Empty State ─────────────────────────────────────────────────────────────
 
 class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
   @override
   Widget build(BuildContext context) {
     return Center(
