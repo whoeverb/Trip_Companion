@@ -104,6 +104,7 @@ class TripListScreen extends StatefulWidget {
 
 class _TripListScreenState extends State<TripListScreen> {
   List<TripMeta>? _trips;
+  bool _isLoading = false;
   String? _error;
 
   static const List<List<Color>> _coverGradients = [
@@ -122,14 +123,29 @@ class _TripListScreenState extends State<TripListScreen> {
     }).catchError((_) {});
   }
 
+  Future<void> _sync() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      final trips = await TripService.fetchIndex(forceRefresh: true);
+      setState(() => _trips = trips);
+    } catch (e) {
+      setState(() => _error = e.toString());
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bg,
       body: CustomScrollView(
         slivers: [
-          const SliverToBoxAdapter(
-            child: _ListHeader(),
+          SliverToBoxAdapter(
+            child: _ListHeader(onSync: _sync, isLoading: _isLoading),
           ),
           if (_error != null)
             SliverToBoxAdapter(child: _ErrorBanner(message: _error!)),
@@ -202,7 +218,9 @@ class _TripListScreenState extends State<TripListScreen> {
 // ─── List Header ─────────────────────────────────────────────────────────────
 
 class _ListHeader extends StatelessWidget {
-  const _ListHeader();
+  final VoidCallback onSync;
+  final bool isLoading;
+  const _ListHeader({required this.onSync, required this.isLoading});
 
   @override
   Widget build(BuildContext context) {
@@ -253,6 +271,8 @@ class _ListHeader extends StatelessWidget {
               letterSpacing: -1,
             ),
           ),
+          const SizedBox(height: 24),
+          _SyncButton(onTap: onSync, isLoading: isLoading),
         ],
       ),
     );
@@ -310,7 +330,7 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Check back later for updates.',
+            'Tap Sync Trips to load your itineraries',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
@@ -354,6 +374,63 @@ class _ErrorBanner extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ─── Sync Button ─────────────────────────────────────────────────────────────
+
+class _SyncButton extends StatelessWidget {
+  final VoidCallback onTap;
+  final bool isLoading;
+  const _SyncButton({required this.onTap, required this.isLoading});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.teal,
+          foregroundColor: Colors.black,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+        child: isLoading
+            ? const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.black54),
+                  ),
+                  SizedBox(width: 10),
+                  Text('Syncing…',
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87)),
+                ],
+              )
+            : const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.sync_rounded, size: 18, color: Colors.black),
+                  SizedBox(width: 8),
+                  Text('Sync Trips',
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black)),
+                ],
+              ),
       ),
     );
   }
