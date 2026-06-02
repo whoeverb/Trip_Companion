@@ -1257,6 +1257,19 @@ class _EventCardState extends State<_EventCard> {
       accent = AppColors.teal;
       bg = AppColors.tealGlow;
     }
+
+    String displayTime = widget.event.time;
+    if (widget.event.time.contains('T')) {
+      try {
+        final dt = DateTime.parse(widget.event.time).toLocal();
+        final hour = dt.hour;
+        final minute = dt.minute.toString().padLeft(2, '0');
+        final period = hour >= 12 ? 'PM' : 'AM';
+        final displayHour = hour % 12 == 0 ? 12 : hour % 12;
+        displayTime = '$displayHour:$minute $period';
+      } catch (_) {}
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -1289,7 +1302,7 @@ class _EventCardState extends State<_EventCard> {
                       Row(
                         children: [
                           Text(
-                            widget.event.time,
+                            displayTime,
                             style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
