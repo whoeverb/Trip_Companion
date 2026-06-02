@@ -1,0 +1,146 @@
+{
+  "tripName": "2026_May_Toronto",
+  "lastUpdated": "2026-06-02T21:21:25.031Z",
+  "rows": [
+    {
+      "Day": 1,
+      "Date": "2026-05-29T04:00:00.000Z",
+      "Time": "1899-12-30T22:00:00.000Z",
+      "Title": "Leaving Rego Park",
+      "Type": "Driving",
+      "Location": "Rego Park, NY",
+      "Address": "99-40 63rd Rd, Rego Park, NY 11374",
+      "Note": "Leaving NYC after work"
+    },
+    {
+      "Day": 1,
+      "Date": "2026-05-29T04:00:00.000Z",
+      "Time": "1899-12-31T03:00:00.000Z",
+      "Title": "Check in American best value inn",
+      "Type": "Lodging",
+      "Location": "Corning, NY",
+      "Address": "196 South Hamilton Street, Painted Post, NY 14870",
+      "Note": ""
+    },
+    {
+      "Day": 2,
+      "Date": "2026-05-30T04:00:00.000Z",
+      "Time": "1899-12-30T11:15:00.000Z",
+      "Title": "Breakfast at hotel or on the way",
+      "Type": "Dining",
+      "Location": "Corning, NY",
+      "Address": "",
+      "Note": "Early Morning"
+    },
+    {
+      "Day": 2,
+      "Date": "2026-05-30T04:00:00.000Z",
+      "Time": "1899-12-30T16:00:00.000Z",
+      "Title": "Dim Sum Lunch at Summit Garden",
+      "Type": "Dining",
+      "Location": "Mississauga, ON",
+      "Address": "3015 Winston Churchill Blvd, Mississauga, ON L5L 2V8, Canada",
+      "Note": "Dim Sum for Lunch"
+    },
+    {
+      "Day": 2,
+      "Date": "2026-05-30T04:00:00.000Z",
+      "Time": "1899-12-30T18:00:00.000Z",
+      "Title": "Royal Botanic Garden ",
+      "Type": "Activity",
+      "Location": "Burlington, ON",
+      "Address": "680 Plains Rd W, Burlington, ON L7T 4H4, Canada",
+      "Note": "$17.42 per ticket?"
+    },
+    {
+      "Day": 2,
+      "Date": "2026-05-30T04:00:00.000Z",
+      "Time": "1899-12-30T21:00:00.000Z",
+      "Title": "Desert at saving thyme",
+      "Type": "Dining",
+      "Location": "Burlington, ON",
+      "Address": "450 Appleby Line, Burlington, ON L7L 2Y2, Canada",
+      "Note": ""
+    },
+    {
+      "Day": 2,
+      "Date": "2026-05-30T04:00:00.000Z",
+      "Time": "1899-12-30T22:00:00.000Z",
+      "Title": "Stroll around Paletta Lakefront Park",
+      "Type": "Activity",
+      "Location": "Burlington, ON",
+      "Address": "4280 Lakeshore Rd., Burlington, ON L7L 1A8, Canada",
+      "Note": ""
+    },
+    {
+      "Day": 2,
+      "Date": "2026-05-30T04:00:00.000Z",
+      "Time": "1899-12-30T23:00:00.000Z",
+      "Title": "Dinner at Congee Queen",
+      "Type": "Dining",
+      "Location": "Mississauga, ON",
+      "Address": "800 Boyer Blvd #5, Mississauga, ON L5V 2Y1, Canada",
+      "Note": ""
+    },
+    {
+      "Day": 2,
+      "Date": "2026-05-30T04:00:00.000Z",
+      "Time": "1899-12-31T01:00:00.000Z",
+      "Title": "Check in Admiral inn",
+      "Type": "Lodging",
+      "Location": "Mississauga, ON",
+      "Address": "2161 North Sheridan Way, L5K 1A3 Mississauga, ON L5K 1A3, Canada",
+      "Note": ""
+    },
+    {
+      "Day": 3,
+      "Date": "2026-05-31T04:00:00.000Z",
+      "Time": "1899-12-30T12:00:00.000Z",
+      "Title": "Breakfast at hotel ",
+      "Type": "Dining",
+      "Location": "Mississauga, ON",
+      "Address": "",
+      "Note": ""
+    },
+    {
+      "Day": 3,
+      "Date": "2026-05-31T04:00:00.000Z",
+      "Time": "1899-12-30T13:00:00.000Z",
+      "Title": "Birding RBG Cootes Paradise Sanctuary",
+      "Type": "Activity",
+      "Location": "Dundas, ON",
+      "Address": "",
+      "Note": "Ticket?"
+    },
+    {
+      "Day": 3,
+      "Date": "2026-05-31T04:00:00.000Z",
+      "Time": "1899-12-30T18:00:00.000Z",
+      "Title": "Lunch at cracker Barrels",
+      "Type": "Dining",
+      "Location": "Buffalo, NY",
+      "Address": "6643 Transit Rd, Williamsville, NY 14221",
+      "Note": ""
+    },
+    {
+      "Day": 3,
+      "Date": "2026-05-31T04:00:00.000Z",
+      "Time": "1899-12-30T19:00:00.000Z",
+      "Title": "Waterfalls hikes?",
+      "Type": "Activity",
+      "Location": "",
+      "Address": "",
+      "Note": ""
+    },
+    {
+      "Day": 3,
+      "Date": "2026-05-31T04:00:00.000Z",
+      "Time": "",
+      "Title": "Return to Rego Park",
+      "Type": "Driving",
+      "Location": "Rego Park, NY",
+      "Address": "99-40 63rd Rd, Rego Park, NY 11374",
+      "Note": ""
+    }
+  ]
+}
