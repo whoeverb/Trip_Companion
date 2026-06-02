@@ -818,26 +818,13 @@ class _DayNavBarState extends State<_DayNavBar> {
                             selected ? AppColors.teal : AppColors.cardBorder,
                       ),
                     ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Day ${i + 1}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: selected ? Colors.black : AppColors.inkSoft,
-                          ),
-                        ),
-                        Text(
-                          widget.days[i].date,
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w600,
-                            color: selected ? Colors.black : AppColors.inkSoft,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      'Day ${i + 1}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: selected ? Colors.black : AppColors.inkSoft,
+                      ),
                     ),
                   ),
                 );
@@ -949,14 +936,20 @@ class _DayContentState extends State<_DayContent> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "TODAY'S DATE",
-                style: TextStyle(
-                  fontSize: 9,
-                  letterSpacing: 1.5,
-                  color: AppColors.muted,
-                  fontWeight: FontWeight.w600,
-                ),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today_rounded, size: 14, color: AppColors.teal),
+                  const SizedBox(width: 6),
+                  const Text(
+                    "DATE",
+                    style: TextStyle(
+                      fontSize: 9,
+                      letterSpacing: 1.5,
+                      color: AppColors.muted,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 4),
               Text(
