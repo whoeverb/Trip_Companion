@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:googleapis/sheets/v4.dart' as sheets;
-import 'package:googleapis/drive/v3.dart' as drive;
-import 'package:extension_google_sign_in_as_googleapis_auth/extension_google_sign_in_as_googleapis_auth.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:math' as math;
+import 'trip_service.dart';
 
 void main() => runApp(const TravelApp());
 
@@ -108,16 +103,7 @@ class TripListScreen extends StatefulWidget {
 }
 
 class _TripListScreenState extends State<TripListScreen> {
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    clientId:
-        '570712793802-jdh0oans9k8r2o70o040mc39dt8k7to5.apps.googleusercontent.com',
-    scopes: [
-      'https://www.googleapis.com/auth/spreadsheets.readonly',
-      'https://www.googleapis.com/auth/drive.readonly',
-    ],
-  );
-
-  List<drive.File>? _trips;
+  List<TripMeta>? _trips;
   bool _isLoading = false;
   String? _error;
 
@@ -129,31 +115,22 @@ class _TripListScreenState extends State<TripListScreen> {
     [Color(0xFF3A2A10), Color(0xFF8A6A20), Color(0xFFE8A838)],
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    TripService.fetchIndex().then((trips) {
+      if (mounted) setState(() => _trips = trips);
+    }).catchError((_) {});
+  }
+
   Future<void> _sync() async {
     setState(() {
       _isLoading = true;
       _error = null;
     });
     try {
-      final account = await _googleSignIn.signIn();
-      if (account == null) {
-        setState(() => _isLoading = false);
-        return;
-      }
-      final client = await _googleSignIn.authenticatedClient();
-      if (client == null) throw Exception('Auth failed');
-      final driveApi = drive.DriveApi(client);
-      final folders = await driveApi.files.list(
-        q: "name = 'Trip' and mimeType = 'application/vnd.google-apps.folder'",
-      );
-      if (folders.files == null || folders.files!.isEmpty) {
-        throw Exception("No 'Trip' folder found in Google Drive.");
-      }
-      final folderId = folders.files!.first.id;
-      final files = await driveApi.files.list(
-        q: "'$folderId' in parents and mimeType = 'application/vnd.google-apps.spreadsheet'",
-      );
-      setState(() => _trips = files.files ?? []);
+      final trips = await TripService.fetchIndex(forceRefresh: true);
+      setState(() => _trips = trips);
     } catch (e) {
       setState(() => _error = e.toString());
     } finally {
@@ -197,17 +174,15 @@ class _TripListScreenState extends State<TripListScreen> {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 16),
                       child: _TripCard(
-                        name: trip.name ?? 'Untitled',
+                        name: trip.name,
                         gradient: gradient,
                         index: index,
                         onTap: () => Navigator.push(
                           context,
                           _slideRoute(
                             ItineraryScreen(
-                              spreadsheetId: trip.id!,
-                              tripName: trip.name ?? 'Itinerary',
+                              meta: trip,
                               gradient: gradient,
-                              googleSignIn: _googleSignIn,
                             ),
                           ),
                         ),
@@ -572,17 +547,13 @@ class _TripCard extends StatelessWidget {
 // ─── Itinerary Screen ─────────────────────────────────────────────────────────
 
 class ItineraryScreen extends StatefulWidget {
-  final String spreadsheetId;
-  final String tripName;
+  final TripMeta meta;
   final List<Color> gradient;
-  final GoogleSignIn googleSignIn;
 
   const ItineraryScreen({
     super.key,
-    required this.spreadsheetId,
-    required this.tripName,
+    required this.meta,
     required this.gradient,
-    required this.googleSignIn,
   });
 
   @override
@@ -596,68 +567,7 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
   @override
   void initState() {
     super.initState();
-    _tripFuture = _fetchTrip();
-  }
-
-  Future<Trip> _fetchTrip() async {
-    final client = await widget.googleSignIn.authenticatedClient();
-    if (client == null) throw Exception('Not authenticated');
-    final api = sheets.SheetsApi(client);
-    final response = await api.spreadsheets.values.get(
-      widget.spreadsheetId,
-      'Sheet1!A2:H100',
-    );
-    final rows = response.values ?? [];
-    if (rows.isEmpty) throw Exception('Spreadsheet is empty');
-
-    Map<String, List<Event>> dayEventsMap = {};
-    Map<String, List<String>> lodgingMap = {};
-    Set<String> daysOrder = {};
-    Map<String, Set<String>> locationMap = {};
-
-    for (var row in rows) {
-      if (row.length < 5) continue;
-      String day = row[0].toString();
-      String date = row[1].toString();
-      String time = row[2].toString();
-      String title = row[3].toString();
-      String type = row[4].toString();
-      String loc = row.length > 5 ? row[5].toString() : "";
-      
-      String dayKey = "$day|$date";
-      daysOrder.add(dayKey);
-      
-      if (loc.isNotEmpty) {
-        locationMap.putIfAbsent(dayKey, () => {}).add(loc);
-      }
-      String addr = row.length > 6 ? row[6].toString() : "";
-      String note = row.length > 7 ? row[7].toString() : "";
-
-      if (type.toLowerCase() == 'lodging') {
-        lodgingMap[dayKey] = [title, addr];
-      } else {
-        dayEventsMap
-            .putIfAbsent(dayKey, () => [])
-            .add(Event(time, title, type, loc, addr, note));
-      }
-    }
-
-    List<String> sortedDays = daysOrder.toList()..sort();
-    List<TripDay> tripDays = sortedDays.map((key) {
-      var parts = key.split('|');
-      var lodgingData = lodgingMap[key] ?? ['', ''];
-      
-      return TripDay(
-        date: parts[1],
-        lodgingTitle: lodgingData[0],
-        lodgingAddress: lodgingData[1],
-        locations: locationMap[key] ?? {},
-        events: dayEventsMap[key] ?? [],
-      );
-    }).toList();
-
-    return Trip(
-        id: widget.spreadsheetId, name: widget.tripName, days: tripDays);
+    _tripFuture = TripService.fetchTrip(widget.meta);
   }
 
   @override
@@ -682,7 +592,7 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
           return Column(
             children: [
               _ImageHeader(
-                tripName: widget.tripName,
+                tripName: widget.meta.name,
                 dayCount: trip.days.length,
               ),
               _DayNavBar(
