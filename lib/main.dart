@@ -885,18 +885,53 @@ class _DayContentState extends State<_DayContent> {
             final city = res['name'];
             final country = (res['country_code'] ?? '').toString().toLowerCase();
             
-            final weatherUrl = Uri.parse('https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,weather_code&temperature_unit=fahrenheit');
+            final tripDate = widget.day.date.contains('T') ? widget.day.date.split('T')[0] : widget.day.date;
+            final today = DateTime.now();
+            final tripDateTime = DateTime.tryParse(tripDate) ?? today;
+            final daysFromToday = tripDateTime.difference(today).inDays;
+            
+            Uri? weatherUrl;
+            if (daysFromToday < 0) {
+                weatherUrl = Uri.parse('https://archive-api.open-meteo.com/v1/archive?latitude=$lat&longitude=$lon&daily=temperature_2m_max,temperature_2m_min,weather_code&temperature_unit=fahrenheit&timezone=auto&start_date=$tripDate&end_date=$tripDate');
+            } else if (daysFromToday <= 16) {
+                weatherUrl = Uri.parse('https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&daily=temperature_2m_max,temperature_2m_min,weather_code&temperature_unit=fahrenheit&timezone=auto&start_date=$tripDate&end_date=$tripDate');
+            }
+
+            if (weatherUrl == null) {
+                setState(() {
+                    _weatherData.add({
+                        'city': city,
+                        'country': country,
+                        'tempMax': 0.0,
+                        'tempMin': 0.0,
+                        'code': '-1'
+                    });
+                });
+                continue;
+            }
+
             final weatherResponse = await http.get(weatherUrl);
             
             if (weatherResponse.statusCode == 200 && mounted) {
               final data = json.decode(weatherResponse.body);
-              final current = data['current'];
+              final daily = data['daily'];
+              final tempMaxList = daily['temperature_2m_max'] as List?;
+              final tempMinList = daily['temperature_2m_min'] as List?;
+              final codeList = daily['weather_code'] as List?;
+
+              if (tempMaxList == null || tempMaxList.isEmpty) continue;
+
+              final tempMax = (tempMaxList[0] as num).toDouble();
+              final tempMin = (tempMinList![0] as num).toDouble();
+              final code = codeList![0].toString();
+
               setState(() {
                 _weatherData.add({
                   'city': city,
                   'country': country,
-                  'temp': (current['temperature_2m'] as num).toDouble(),
-                  'code': current['weather_code'].toString()
+                  'tempMax': tempMax,
+                  'tempMin': tempMin,
+                  'code': code
                 });
               });
             }
@@ -960,7 +995,8 @@ class _DayContentState extends State<_DayContent> {
           children: _weatherData.map((w) => _WeatherChip(
             city: w['city'],
             country: w['country'],
-            tempF: w['temp'],
+            tempMax: w['tempMax'],
+            tempMin: w['tempMin'],
             icon: w['code'],
           )).toList(),
         ),
@@ -996,13 +1032,15 @@ class _DayContentState extends State<_DayContent> {
 class _WeatherChip extends StatelessWidget {
   final String city;
   final String country;
-  final double tempF;
+  final double tempMax;
+  final double tempMin;
   final String icon;
   const _WeatherChip(
-      {required this.city, required this.country, required this.tempF, required this.icon});
+      {required this.city, required this.country, required this.tempMax, required this.tempMin, required this.icon});
 
   Map<String, dynamic> _weatherStyle(String code) {
     final c = int.parse(code);
+    if (c == -1) return {'icon': Icons.wb_sunny_rounded, 'color': const Color(0xFFFFD700), 'bg': const Color(0x33FFD700)};
     if (c == 0) return {'icon': Icons.wb_sunny_rounded, 'color': const Color(0xFFFFD700), 'bg': const Color(0x33FFD700)};
     if (c >= 1 && c <= 3) return {'icon': Icons.wb_cloudy_rounded, 'color': const Color(0xFFB0BEC5), 'bg': const Color(0x33B0BEC5)};
     if (c >= 4 && c <= 48) return {'icon': Icons.foggy, 'color': const Color(0xFF90A4AE), 'bg': const Color(0x3390A4AE)};
@@ -1014,6 +1052,7 @@ class _WeatherChip extends StatelessWidget {
 
   String _desc(String code) {
     final c = int.parse(code);
+    if (c == -1) return "N/A";
     if (c == 0) return "Sunny";
     if (c <= 3) return "Cloudy";
     if (c <= 48) return "Foggy";
@@ -1025,7 +1064,6 @@ class _WeatherChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tempC = ((tempF - 32) * 5 / 9).round();
     final style = _weatherStyle(icon);
     return Container(
       width: 140,
@@ -1049,15 +1087,20 @@ class _WeatherChip extends StatelessWidget {
             child: Icon(style['icon'], color: style['color'], size: 26),
           ),
           const SizedBox(height: 8),
-          Text(
-            '${tempF.round()}°F / ${tempC}°C',
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: AppColors.ink,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
+          (tempMax == 0 && tempMin == 0)
+              ? const Text(
+                  'Forecast unavailable',
+                  style: TextStyle(fontSize: 9, color: AppColors.muted),
+                )
+              : Text(
+                  '${tempMax.round()}°F / ${((tempMin - 32) * 5 / 9).round()}°C',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.ink,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
           const SizedBox(height: 2),
           Text(
             _desc(icon),
