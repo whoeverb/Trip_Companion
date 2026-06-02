@@ -883,7 +883,7 @@ class _DayContentState extends State<_DayContent> {
             final lat = res['latitude'];
             final lon = res['longitude'];
             final city = res['name'];
-            final country = res['country'];
+            final country = (res['country_code'] ?? '').toString().toLowerCase();
             
             final weatherUrl = Uri.parse('https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,weather_code&temperature_unit=fahrenheit');
             final weatherResponse = await http.get(weatherUrl);
@@ -1001,14 +1001,6 @@ class _WeatherChip extends StatelessWidget {
   const _WeatherChip(
       {required this.city, required this.country, required this.tempF, required this.icon});
 
-  String _countryFlag(String code) {
-    if (code.length != 2) return '';
-    final base = 0x1F1E0;
-    final chars = code.toUpperCase().codeUnits;
-    return String.fromCharCode(base + chars[0] - 65) +
-           String.fromCharCode(base + chars[1] - 65);
-  }
-
   Map<String, dynamic> _weatherStyle(String code) {
     final c = int.parse(code);
     if (c == 0) return {'icon': Icons.wb_sunny_rounded, 'color': const Color(0xFFFFD700), 'bg': const Color(0x33FFD700)};
@@ -1077,15 +1069,28 @@ class _WeatherChip extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 2),
-          Text(
-            '${_countryFlag(country)} $city',
-            style: const TextStyle(
-              fontSize: 9,
-              color: AppColors.muted,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.network(
+                'https://flagcdn.com/24x18/${country.toLowerCase()}.png',
+                width: 20,
+                height: 15,
+                errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+              ),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  city,
+                  style: const TextStyle(
+                    fontSize: 9,
+                    color: AppColors.muted,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
         ],
       ),
