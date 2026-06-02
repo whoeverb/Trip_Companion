@@ -926,42 +926,32 @@ class _DayContentState extends State<_DayContent> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-          decoration: BoxDecoration(
-            color: AppColors.card,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.cardBorder),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+              decoration: BoxDecoration(
+                color: AppColors.teal.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.teal.withOpacity(0.3)),
+              ),
+              child: Row(
                 children: [
-                  const Icon(Icons.calendar_today_rounded, size: 14, color: AppColors.teal),
+                  const Icon(Icons.calendar_today_rounded, size: 12, color: AppColors.teal),
                   const SizedBox(width: 6),
-                  const Text(
-                    "DATE",
-                    style: TextStyle(
-                      fontSize: 9,
-                      letterSpacing: 1.5,
-                      color: AppColors.muted,
+                  Text(
+                    widget.day.date.split('T')[0],
+                    style: const TextStyle(
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
+                      color: AppColors.teal,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
-              Text(
-                widget.day.date,
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: AppColors.ink,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
         const SizedBox(height: 20),
         Wrap(
@@ -1035,7 +1025,6 @@ class _WeatherChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tempC = ((tempF - 32) * 5 / 9).round();
     return Container(
       width: 120,
       height: 130, // Increased height slightly to accommodate content
