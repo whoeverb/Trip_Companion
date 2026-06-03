@@ -1089,6 +1089,27 @@ class _DayContentState extends State<_DayContent> {
   @override
   Widget build(BuildContext context) {
     final origins = _buildOrigins();
+    
+    String displayDate = widget.day.date;
+    try {
+      final parts = widget.day.date.split(' ');
+      if (parts.length >= 2) {
+        final datePart = parts[1]; // e.g. "5/29/26"
+        final dateParts = datePart.split('/');
+        if (dateParts.length == 3) {
+          final month = int.parse(dateParts[0]);
+          final day = int.parse(dateParts[1]);
+          final year = 2000 + int.parse(dateParts[2]);
+          final dt = DateTime(year, month, day);
+          const months = ['January','February','March','April','May','June',
+            'July','August','September','October','November','December'];
+          const weekdays = ['Monday','Tuesday','Wednesday','Thursday',
+            'Friday','Saturday','Sunday'];
+          displayDate = '${weekdays[dt.weekday - 1]}, ${months[dt.month - 1]} ${dt.day}';
+        }
+      }
+    } catch (_) {}
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
       children: [
@@ -1107,7 +1128,7 @@ class _DayContentState extends State<_DayContent> {
                   const Icon(Icons.calendar_today_rounded, size: 12, color: AppColors.teal),
                   const SizedBox(width: 6),
                   Text(
-                    widget.day.date.split('T')[0],
+                    displayDate,
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
