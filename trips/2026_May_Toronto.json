@@ -1,10 +1,10 @@
 {
   "tripName": "2026_May_Toronto",
-  "lastUpdated": "2026-06-02T23:31:55.556Z",
+  "lastUpdated": "2026-06-03T00:00:35.221Z",
   "rows": [
     {
       "Day": "1",
-      "Date": "Fri 5/29/26",
+      "Date": "Fri 6/5/26",
       "Time": "5:00 PM",
       "Title": "Leaving Rego Park",
       "Type": "Driving",
@@ -14,7 +14,7 @@
     },
     {
       "Day": "1",
-      "Date": "Fri 5/29/26",
+      "Date": "Fri 6/5/26",
       "Time": "10:00 PM",
       "Title": "Check in American best value inn",
       "Type": "Lodging",
@@ -24,7 +24,7 @@
     },
     {
       "Day": "2",
-      "Date": "Sat 5/30/26",
+      "Date": "Sat 6/6/26",
       "Time": "6:15 AM",
       "Title": "Breakfast at hotel or on the way",
       "Type": "Dining",
@@ -34,7 +34,7 @@
     },
     {
       "Day": "2",
-      "Date": "Sat 5/30/26",
+      "Date": "Sat 6/6/26",
       "Time": "11:00 AM",
       "Title": "Dim Sum Lunch at Summit Garden",
       "Type": "Dining",
@@ -44,7 +44,7 @@
     },
     {
       "Day": "2",
-      "Date": "Sat 5/30/26",
+      "Date": "Sat 6/6/26",
       "Time": "1:00 PM",
       "Title": "Royal Botanic Garden ",
       "Type": "Activity",
@@ -54,7 +54,7 @@
     },
     {
       "Day": "2",
-      "Date": "Sat 5/30/26",
+      "Date": "Sat 6/6/26",
       "Time": "4:00 PM",
       "Title": "Desert at saving thyme",
       "Type": "Dining",
@@ -64,7 +64,7 @@
     },
     {
       "Day": "2",
-      "Date": "Sat 5/30/26",
+      "Date": "Sat 6/6/26",
       "Time": "5:00 PM",
       "Title": "Stroll around Paletta Lakefront Park",
       "Type": "Activity",
@@ -74,7 +74,7 @@
     },
     {
       "Day": "2",
-      "Date": "Sat 5/30/26",
+      "Date": "Sat 6/6/26",
       "Time": "6:00 PM",
       "Title": "Dinner at Congee Queen",
       "Type": "Dining",
@@ -84,7 +84,7 @@
     },
     {
       "Day": "2",
-      "Date": "Sat 5/30/26",
+      "Date": "Sat 6/6/26",
       "Time": "8:00 PM",
       "Title": "Check in Admiral inn",
       "Type": "Lodging",
@@ -94,7 +94,7 @@
     },
     {
       "Day": "3",
-      "Date": "Sun 5/31/26",
+      "Date": "Sun 6/7/26",
       "Time": "7:00 AM",
       "Title": "Breakfast at hotel ",
       "Type": "Dining",
@@ -104,7 +104,7 @@
     },
     {
       "Day": "3",
-      "Date": "Sun 5/31/26",
+      "Date": "Sun 6/7/26",
       "Time": "8:00 AM",
       "Title": "Birding RBG Cootes Paradise Sanctuary",
       "Type": "Activity",
@@ -114,7 +114,7 @@
     },
     {
       "Day": "3",
-      "Date": "Sun 5/31/26",
+      "Date": "Sun 6/7/26",
       "Time": "1:00 PM",
       "Title": "Lunch at cracker Barrels",
       "Type": "Dining",
@@ -124,7 +124,7 @@
     },
     {
       "Day": "3",
-      "Date": "Sun 5/31/26",
+      "Date": "Sun 6/7/26",
       "Time": "2:00 PM",
       "Title": "Waterfalls hikes?",
       "Type": "Activity",
@@ -134,7 +134,7 @@
     },
     {
       "Day": "3",
-      "Date": "Sun 5/31/26",
+      "Date": "Sun 6/7/26",
       "Time": "",
       "Title": "Return to Rego Park",
       "Type": "Driving",
