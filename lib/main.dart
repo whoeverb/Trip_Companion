@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -1126,13 +1127,16 @@ class _DayContentState extends State<_DayContent> {
               scrollDirection: Axis.horizontal,
               itemCount: 3,
               separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (_, __) => Container(
-                width: 140,
-                height: 160,
-                decoration: BoxDecoration(
-                  color: AppColors.card,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.cardBorder),
+              itemBuilder: (_, __) => Shimmer.fromColors(
+                baseColor: AppColors.card,
+                highlightColor: AppColors.cardBorder,
+                child: Container(
+                  width: 140,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    color: AppColors.card,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
               ),
             ),
