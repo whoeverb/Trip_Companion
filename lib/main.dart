@@ -1372,8 +1372,6 @@ class _LodgingCard extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded,
-              color: AppColors.muted, size: 20),
         ],
       ),
     );
