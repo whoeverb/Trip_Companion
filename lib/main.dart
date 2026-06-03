@@ -1399,7 +1399,6 @@ class _EventCardState extends State<_EventCard> {
 
   Future<void> _fetchTravelTime() async {
     if (kIsWeb) return;
-    debugPrint('Travel time fetch: origin="${widget.originAddress}" dest="${widget.event.address}" type="${widget.event.type}"');
     final t = widget.event.type.toLowerCase();
     final mode = t.contains('transit') ? 'transit' : 'driving';
     final targetUrl =
@@ -1412,7 +1411,6 @@ class _EventCardState extends State<_EventCard> {
     
     try {
       final response = await http.get(proxyUrl);
-      debugPrint('Travel time response: ${response.statusCode} body=${response.body.substring(0, response.body.length.clamp(0, 200))}');
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         final rows = data['rows'] as List<dynamic>?;
