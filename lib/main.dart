@@ -107,6 +107,7 @@ class TripListScreen extends StatefulWidget {
 class _TripListScreenState extends State<TripListScreen> {
   List<TripMeta>? _trips;
   bool _isLoading = false;
+  bool _isInitialLoading = true;
   String? _error;
   String? _lastSynced;
 
@@ -125,8 +126,10 @@ class _TripListScreenState extends State<TripListScreen> {
       setState(() => _lastSynced = p.getString('last_synced'));
     });
     TripService.fetchIndex().then((trips) {
-      if (mounted) setState(() => _trips = trips);
-    }).catchError((_) {});
+      if (mounted) setState(() { _trips = trips; _isInitialLoading = false; });
+    }).catchError((_) {
+      if (mounted) setState(() => _isInitialLoading = false);
+    });
   }
 
   Future<void> _sync() async {
@@ -205,10 +208,16 @@ class _TripListScreenState extends State<TripListScreen> {
               ),
             ),
           if (_trips == null)
-            const SliverFillRemaining(
-              hasScrollBody: false,
-              child: _EmptyState(),
-            ),
+            _isInitialLoading
+                ? const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                        child: CircularProgressIndicator(color: AppColors.teal)),
+                  )
+                : const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: _EmptyState(),
+                  ),
         ],
       ),
     );
@@ -1380,7 +1389,9 @@ class _EventCardState extends State<_EventCard> {
   @override
   void initState() {
     super.initState();
-    if (widget.originAddress.isNotEmpty &&
+    final t = widget.event.type.toLowerCase();
+    if ((t.contains('driving') || t.contains('transit')) &&
+        widget.originAddress.isNotEmpty &&
         widget.event.address.isNotEmpty) {
       _fetchTravelTime();
     }
