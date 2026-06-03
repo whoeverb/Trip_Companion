@@ -18,7 +18,24 @@ class TripMeta {
     );
   }
   
-  String get displayName => name.isEmpty ? file : name;
+  static String _cleanTripName(String raw) {
+    final filterWords = {
+      'trip', 'road', 'may', 'jan', 'feb', 'mar', 'apr', 'jun', 'jul',
+      'aug', 'sep', 'oct', 'nov', 'dec', 'summer', 'winter', 'spring',
+      'fall', 'tour', 'journey'
+    };
+    final parts = raw.split('_');
+    final filtered = parts.where((p) {
+      if (p.isEmpty) return false;
+      if (int.tryParse(p) != null) return false;
+      if (filterWords.contains(p.toLowerCase())) return false;
+      return true;
+    }).map((p) => p[0].toUpperCase() + p.substring(1).toLowerCase()).toList();
+    if (filtered.isEmpty) return raw.replaceAll('_', ' ');
+    return filtered.join(' ');
+  }
+
+  String get displayName => _cleanTripName(name);
 }
 
 class TripService {
