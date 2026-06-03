@@ -944,10 +944,15 @@ class _DayContentState extends State<_DayContent> {
             final city = res['name'];
             final country = (res['country_code'] ?? '').toString().toLowerCase();
             
-            final tripDate = widget.day.date.contains('T') ? widget.day.date.split('T')[0] : widget.day.date;
+            final dt = DateTime.tryParse(widget.day.date);
+            if (dt == null) {
+                debugPrint("Invalid date format: ${widget.day.date}");
+                continue; // Skip if date is invalid
+            }
+            final tripDate = "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}";
+
             final today = DateTime.now();
-            final tripDateTime = DateTime.tryParse(tripDate) ?? today;
-            final daysFromToday = tripDateTime.difference(today).inDays;
+            final daysFromToday = dt.difference(today).inDays;
             
             Uri? weatherUrl;
             if (daysFromToday < 0) {
@@ -1320,10 +1325,9 @@ class _EventCardState extends State<_EventCard> {
         '&destinations=${Uri.encodeComponent(widget.event.address)}'
         '&mode=$mode'
         '&key=$_mapsApiKey';
-    final proxyUrl = Uri.parse('https://corsproxy.io/?$targetUrl');
-
+    
     try {
-      final response = await http.get(proxyUrl);
+      final response = await http.get(Uri.parse(targetUrl));
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         final rows = data['rows'] as List<dynamic>?;
