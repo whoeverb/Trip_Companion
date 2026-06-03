@@ -17,6 +17,8 @@ class TripMeta {
       modifiedAt: json['modifiedAt'] ?? '',
     );
   }
+  
+  String get displayName => name.isEmpty ? file : name;
 }
 
 class TripService {
