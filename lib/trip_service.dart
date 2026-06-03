@@ -7,14 +7,24 @@ class TripMeta {
   final String name;
   final String file;
   final String modifiedAt;
+  final String startDate;
+  final String endDate;
 
-  TripMeta({required this.name, required this.file, required this.modifiedAt});
+  TripMeta({
+    required this.name,
+    required this.file,
+    required this.modifiedAt,
+    required this.startDate,
+    required this.endDate,
+  });
 
   factory TripMeta.fromJson(Map<String, dynamic> json) {
     return TripMeta(
       name: json['name'] ?? '',
       file: json['file'] ?? '',
       modifiedAt: json['modifiedAt'] ?? '',
+      startDate: json['startDate'] ?? '',
+      endDate: json['endDate'] ?? '',
     );
   }
   

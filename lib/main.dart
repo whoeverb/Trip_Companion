@@ -189,7 +189,11 @@ class _TripListScreenState extends State<TripListScreen> {
                       padding: const EdgeInsets.only(bottom: 16),
                       child: _TripCard(
                         name: trip.displayName,
-                        dateRange: trip.modifiedAt.substring(0, 10),
+                        dateRange: (trip.startDate.isEmpty && trip.endDate.isEmpty)
+                          ? ''
+                          : trip.startDate == trip.endDate
+                            ? trip.startDate
+                            : '${trip.startDate} – ${trip.endDate}',
                         gradient: gradient,
                         index: index,
                         onTap: () => Navigator.push(
