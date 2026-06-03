@@ -946,11 +946,11 @@ class _DayContentState extends State<_DayContent> {
             
             final dt = DateTime.tryParse(widget.day.date);
             final tripDateStr = widget.day.date;
-            DateTime? dt;
+            DateTime? parsedDate;
 
             // Attempt to parse different date formats
             try {
-                dt = DateTime.parse(tripDateStr); // ISO format (YYYY-MM-DDTHH:MM:SS.sssZ)
+                parsedDate = DateTime.parse(tripDateStr); // ISO format (YYYY-MM-DDTHH:MM:SS.sssZ)
             } catch (_) {
                 try {
                     // Try parsing 'DayOfWeek Month Day, Year' format
@@ -977,24 +977,20 @@ class _DayContentState extends State<_DayContent> {
                             default: month = -1; 
                         }
                         if (month != -1) {
-                            dt = DateTime.parse('$yearStr-$month-$dayStr');
+                            parsedDate = DateTime.parse('$yearStr-$month-$dayStr');
                         }
                     }
                 } catch (_) {
-                    // If still unable to parse, use today's date as fallback for the logic
-                    dt = DateTime.now();
                     debugPrint("Could not parse date: $tripDateStr, using today's date for logic.");
                 }
             }
 
-            if (dt == null) {
-                debugPrint("Invalid date format after parsing attempts: $tripDateStr");
-                dt = DateTime.now(); // Fallback for date logic
-            }
+            // Fallback to today's date if parsing failed
+            parsedDate ??= DateTime.now();
             
-            final tripDate = "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}";
+            final tripDate = "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
             final today = DateTime.now();
-            final daysFromToday = dt.difference(today).inDays;
+            final daysFromToday = parsedDate.difference(today).inDays;
             
             Uri? weatherUrl;
             if (daysFromToday < 0) {
