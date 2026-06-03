@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -911,6 +912,7 @@ class _DayContent extends StatefulWidget {
 
 class _DayContentState extends State<_DayContent> {
   List<Map<String, dynamic>> _weatherData = [];
+  bool _weatherLoading = false;
 
   @override
   void initState() {
@@ -927,9 +929,19 @@ class _DayContentState extends State<_DayContent> {
   }
 
   Future<void> _fetchWeather() async {
-    setState(() => _weatherData = []);
+    setState(() {
+      _weatherData = [];
+      _weatherLoading = true;
+    });
 
+    final seenCities = <String>{};
+    final uniqueLocations = <String>[];
     for (String loc in widget.day.locations) {
+      final city = loc.split(',')[0].trim().toLowerCase();
+      if (seenCities.add(city)) uniqueLocations.add(loc);
+    }
+
+    for (String loc in uniqueLocations) {
       String query = loc.split(',')[0].trim();
       try {
         final geoUrl = Uri.parse('https://geocoding-api.open-meteo.com/v1/search?name=${Uri.encodeComponent(query)}&count=1&language=en&format=json');
@@ -1043,6 +1055,7 @@ class _DayContentState extends State<_DayContent> {
         debugPrint('Weather error for $loc: $e');
       }
     }
+    if (mounted) setState(() => _weatherLoading = false);
   }
 
   List<String> _buildOrigins() {
@@ -1091,17 +1104,36 @@ class _DayContentState extends State<_DayContent> {
           ],
         ),
         const SizedBox(height: 20),
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: _weatherData.map((w) => _WeatherChip(
-            city: w['city'],
-            country: w['country'],
-            tempMax: w['tempMax'],
-            tempMin: w['tempMin'],
-            icon: w['code'],
-          )).toList(),
-        ),
+        if (_weatherLoading)
+          SizedBox(
+            height: 160,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (_, __) => Container(
+                width: 140,
+                height: 160,
+                decoration: BoxDecoration(
+                  color: AppColors.card,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.cardBorder),
+                ),
+              ),
+            ),
+          )
+        else
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: _weatherData.map((w) => _WeatherChip(
+              city: w['city'],
+              country: w['country'],
+              tempMax: w['tempMax'],
+              tempMin: w['tempMin'],
+              icon: w['code'],
+            )).toList(),
+          ),
         const SizedBox(height: 20),
         if (widget.day.lodgingTitle.isNotEmpty) ...[
           _LodgingCard(
@@ -1355,6 +1387,8 @@ class _EventCardState extends State<_EventCard> {
   }
 
   Future<void> _fetchTravelTime() async {
+    if (kIsWeb) return;
+    debugPrint('Travel time fetch: origin="${widget.originAddress}" dest="${widget.event.address}" type="${widget.event.type}"');
     final t = widget.event.type.toLowerCase();
     final mode = t.contains('transit') ? 'transit' : 'driving';
     final targetUrl =
@@ -1367,6 +1401,7 @@ class _EventCardState extends State<_EventCard> {
     
     try {
       final response = await http.get(proxyUrl);
+      debugPrint('Travel time response: ${response.statusCode} body=${response.body.substring(0, response.body.length.clamp(0, 200))}');
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         final rows = data['rows'] as List<dynamic>?;
@@ -1382,7 +1417,7 @@ class _EventCardState extends State<_EventCard> {
           }
         }
       }
-    } catch (_) {}
+    } catch (e) { debugPrint('Travel time error: $e'); }
   }
 
   Future<void> _launchMaps(String address) async {
