@@ -962,7 +962,7 @@ class _DayContentState extends State<_DayContent> {
       if (i == 0) {
         origins.add(widget.firstEventOrigin);
       } else {
-        origins.add(widget.event.address);
+        origins.add(widget.day.events[i - 1].address);
       }
     }
     return origins;
