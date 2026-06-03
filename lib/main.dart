@@ -638,9 +638,22 @@ class _ImageHeaderState extends State<_ImageHeader> {
 
   void _fetchImage() async {
     final parts = widget.tripName.split('_');
-    final query = parts.isNotEmpty ? parts.last : 'travel';
+    final commonWords = {
+      'trip', 'may', 'jan', 'feb', 'mar', 'apr', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
+      'summer', 'winter', 'spring', 'fall'
+    };
+    final filtered = parts.where((p) {
+      final lower = p.toLowerCase();
+      if (int.tryParse(p) != null) return false;
+      if (commonWords.contains(lower)) return false;
+      return true;
+    }).toList();
+    
+    final queryParts = filtered.length > 2 ? filtered.sublist(filtered.length - 2) : filtered;
+    final query = queryParts.isEmpty ? 'travel landscape' : queryParts.join(' ');
+
     try {
-      final url = Uri.parse('https://api.unsplash.com/search/photos?query=$query&client_id=kBduwH2JVZAUVQ-Y_6gHJJJJguTjibCMy3GDis59FpY&per_page=1');
+      final url = Uri.parse('https://api.unsplash.com/search/photos?query=${Uri.encodeComponent(query)}&client_id=kBduwH2JVZAUVQ-Y_6gHJJJJguTjibCMy3GDis59FpY&per_page=1&orientation=landscape&content_filter=high&order_by=relevant');
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -949,7 +962,7 @@ class _DayContentState extends State<_DayContent> {
       if (i == 0) {
         origins.add(widget.firstEventOrigin);
       } else {
-        origins.add(widget.day.events[i - 1].address);
+        origins.add(widget.event.address);
       }
     }
     return origins;
