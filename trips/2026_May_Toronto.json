@@ -1,11 +1,11 @@
 {
   "tripName": "2026_May_Toronto",
-  "lastUpdated": "2026-06-02T21:21:25.031Z",
+  "lastUpdated": "2026-06-03T00:00:35.221Z",
   "rows": [
     {
-      "Day": 1,
-      "Date": "2026-05-29T04:00:00.000Z",
-      "Time": "1899-12-30T22:00:00.000Z",
+      "Day": "1",
+      "Date": "Fri 6/5/26",
+      "Time": "5:00 PM",
       "Title": "Leaving Rego Park",
       "Type": "Driving",
       "Location": "Rego Park, NY",
@@ -13,9 +13,9 @@
       "Note": "Leaving NYC after work"
     },
     {
-      "Day": 1,
-      "Date": "2026-05-29T04:00:00.000Z",
-      "Time": "1899-12-31T03:00:00.000Z",
+      "Day": "1",
+      "Date": "Fri 6/5/26",
+      "Time": "10:00 PM",
       "Title": "Check in American best value inn",
       "Type": "Lodging",
       "Location": "Corning, NY",
@@ -23,9 +23,9 @@
       "Note": ""
     },
     {
-      "Day": 2,
-      "Date": "2026-05-30T04:00:00.000Z",
-      "Time": "1899-12-30T11:15:00.000Z",
+      "Day": "2",
+      "Date": "Sat 6/6/26",
+      "Time": "6:15 AM",
       "Title": "Breakfast at hotel or on the way",
       "Type": "Dining",
       "Location": "Corning, NY",
@@ -33,9 +33,9 @@
       "Note": "Early Morning"
     },
     {
-      "Day": 2,
-      "Date": "2026-05-30T04:00:00.000Z",
-      "Time": "1899-12-30T16:00:00.000Z",
+      "Day": "2",
+      "Date": "Sat 6/6/26",
+      "Time": "11:00 AM",
       "Title": "Dim Sum Lunch at Summit Garden",
       "Type": "Dining",
       "Location": "Mississauga, ON",
@@ -43,9 +43,9 @@
       "Note": "Dim Sum for Lunch"
     },
     {
-      "Day": 2,
-      "Date": "2026-05-30T04:00:00.000Z",
-      "Time": "1899-12-30T18:00:00.000Z",
+      "Day": "2",
+      "Date": "Sat 6/6/26",
+      "Time": "1:00 PM",
       "Title": "Royal Botanic Garden ",
       "Type": "Activity",
       "Location": "Burlington, ON",
@@ -53,9 +53,9 @@
       "Note": "$17.42 per ticket?"
     },
     {
-      "Day": 2,
-      "Date": "2026-05-30T04:00:00.000Z",
-      "Time": "1899-12-30T21:00:00.000Z",
+      "Day": "2",
+      "Date": "Sat 6/6/26",
+      "Time": "4:00 PM",
       "Title": "Desert at saving thyme",
       "Type": "Dining",
       "Location": "Burlington, ON",
@@ -63,9 +63,9 @@
       "Note": ""
     },
     {
-      "Day": 2,
-      "Date": "2026-05-30T04:00:00.000Z",
-      "Time": "1899-12-30T22:00:00.000Z",
+      "Day": "2",
+      "Date": "Sat 6/6/26",
+      "Time": "5:00 PM",
       "Title": "Stroll around Paletta Lakefront Park",
       "Type": "Activity",
       "Location": "Burlington, ON",
@@ -73,9 +73,9 @@
       "Note": ""
     },
     {
-      "Day": 2,
-      "Date": "2026-05-30T04:00:00.000Z",
-      "Time": "1899-12-30T23:00:00.000Z",
+      "Day": "2",
+      "Date": "Sat 6/6/26",
+      "Time": "6:00 PM",
       "Title": "Dinner at Congee Queen",
       "Type": "Dining",
       "Location": "Mississauga, ON",
@@ -83,9 +83,9 @@
       "Note": ""
     },
     {
-      "Day": 2,
-      "Date": "2026-05-30T04:00:00.000Z",
-      "Time": "1899-12-31T01:00:00.000Z",
+      "Day": "2",
+      "Date": "Sat 6/6/26",
+      "Time": "8:00 PM",
       "Title": "Check in Admiral inn",
       "Type": "Lodging",
       "Location": "Mississauga, ON",
@@ -93,9 +93,9 @@
       "Note": ""
     },
     {
-      "Day": 3,
-      "Date": "2026-05-31T04:00:00.000Z",
-      "Time": "1899-12-30T12:00:00.000Z",
+      "Day": "3",
+      "Date": "Sun 6/7/26",
+      "Time": "7:00 AM",
       "Title": "Breakfast at hotel ",
       "Type": "Dining",
       "Location": "Mississauga, ON",
@@ -103,9 +103,9 @@
       "Note": ""
     },
     {
-      "Day": 3,
-      "Date": "2026-05-31T04:00:00.000Z",
-      "Time": "1899-12-30T13:00:00.000Z",
+      "Day": "3",
+      "Date": "Sun 6/7/26",
+      "Time": "8:00 AM",
       "Title": "Birding RBG Cootes Paradise Sanctuary",
       "Type": "Activity",
       "Location": "Dundas, ON",
@@ -113,9 +113,9 @@
       "Note": "Ticket?"
     },
     {
-      "Day": 3,
-      "Date": "2026-05-31T04:00:00.000Z",
-      "Time": "1899-12-30T18:00:00.000Z",
+      "Day": "3",
+      "Date": "Sun 6/7/26",
+      "Time": "1:00 PM",
       "Title": "Lunch at cracker Barrels",
       "Type": "Dining",
       "Location": "Buffalo, NY",
@@ -123,9 +123,9 @@
       "Note": ""
     },
     {
-      "Day": 3,
-      "Date": "2026-05-31T04:00:00.000Z",
-      "Time": "1899-12-30T19:00:00.000Z",
+      "Day": "3",
+      "Date": "Sun 6/7/26",
+      "Time": "2:00 PM",
       "Title": "Waterfalls hikes?",
       "Type": "Activity",
       "Location": "",
@@ -133,8 +133,8 @@
       "Note": ""
     },
     {
-      "Day": 3,
-      "Date": "2026-05-31T04:00:00.000Z",
+      "Day": "3",
+      "Date": "Sun 6/7/26",
       "Time": "",
       "Title": "Return to Rego Park",
       "Type": "Driving",
