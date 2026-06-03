@@ -1162,6 +1162,20 @@ class _DayContentState extends State<_DayContent> {
               ),
             ),
           )
+        else if (_weatherData.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                Icon(Icons.wb_cloudy_outlined, size: 14, color: AppColors.muted),
+                SizedBox(width: 6),
+                Text(
+                  'No weather data for this day',
+                  style: TextStyle(fontSize: 12, color: AppColors.muted),
+                ),
+              ],
+            ),
+          )
         else
           Wrap(
             spacing: 12,
