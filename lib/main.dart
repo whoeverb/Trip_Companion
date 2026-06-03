@@ -945,12 +945,54 @@ class _DayContentState extends State<_DayContent> {
             final country = (res['country_code'] ?? '').toString().toLowerCase();
             
             final dt = DateTime.tryParse(widget.day.date);
-            if (dt == null) {
-                debugPrint("Invalid date format: ${widget.day.date}");
-                continue; // Skip if date is invalid
-            }
-            final tripDate = "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}";
+            final tripDateStr = widget.day.date;
+            DateTime? dt;
 
+            // Attempt to parse different date formats
+            try {
+                dt = DateTime.parse(tripDateStr); // ISO format (YYYY-MM-DDTHH:MM:SS.sssZ)
+            } catch (_) {
+                try {
+                    // Try parsing 'DayOfWeek Month Day, Year' format
+                    final parts = tripDateStr.split(' ');
+                    if (parts.length >= 3) {
+                        final monthStr = parts[1];
+                        final dayStr = parts[2].replaceAll(',', '');
+                        final yearStr = parts[3];
+                        
+                        int month;
+                        switch (monthStr.toLowerCase()) {
+                            case 'jan': month = 1; break;
+                            case 'feb': month = 2; break;
+                            case 'mar': month = 3; break;
+                            case 'apr': month = 4; break;
+                            case 'may': month = 5; break;
+                            case 'jun': month = 6; break;
+                            case 'jul': month = 7; break;
+                            case 'aug': month = 8; break;
+                            case 'sep': month = 9; break;
+                            case 'oct': month = 10; break;
+                            case 'nov': month = 11; break;
+                            case 'dec': month = 12; break;
+                            default: month = -1; 
+                        }
+                        if (month != -1) {
+                            dt = DateTime.parse('$yearStr-$month-$dayStr');
+                        }
+                    }
+                } catch (_) {
+                    // If still unable to parse, use today's date as fallback for the logic
+                    dt = DateTime.now();
+                    debugPrint("Could not parse date: $tripDateStr, using today's date for logic.");
+                }
+            }
+
+            if (dt == null) {
+                debugPrint("Invalid date format after parsing attempts: $tripDateStr");
+                dt = DateTime.now(); // Fallback for date logic
+            }
+            
+            final tripDate = "${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}";
             final today = DateTime.now();
             final daysFromToday = dt.difference(today).inDays;
             
@@ -1325,9 +1367,10 @@ class _EventCardState extends State<_EventCard> {
         '&destinations=${Uri.encodeComponent(widget.event.address)}'
         '&mode=$mode'
         '&key=$_mapsApiKey';
+    final proxyUrl = Uri.parse('https://corsproxy.io/?$targetUrl');
     
     try {
-      final response = await http.get(Uri.parse(targetUrl));
+      final response = await http.get(proxyUrl);
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         final rows = data['rows'] as List<dynamic>?;
