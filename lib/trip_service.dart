@@ -104,11 +104,10 @@ class TripService {
 
       if (type.toLowerCase() == 'lodging') {
         lodgingMap[dayKey] = [title, addr];
-      } else {
-        dayEventsMap
-            .putIfAbsent(dayKey, () => [])
-            .add(Event(time, title, type, loc, addr, note));
       }
+      dayEventsMap
+          .putIfAbsent(dayKey, () => [])
+          .add(Event(time, title, type, loc, addr, note));
     }
 
     List<String> sortedDays = daysOrder.toList()..sort();
