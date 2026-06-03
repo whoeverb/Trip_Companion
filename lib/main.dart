@@ -568,7 +568,7 @@ class _TripCard extends StatelessWidget {
               ),
             ),
             Positioned(
-              bottom: 18,
+              bottom: 14,
               left: 18,
               right: 60,
               child: Column(
@@ -594,6 +594,8 @@ class _TripCard extends StatelessWidget {
                       fontSize: 11,
                       color: Colors.white60,
                     ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ],
               ),
