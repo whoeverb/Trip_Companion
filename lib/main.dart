@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'trip_service.dart';
 
 void main() => runApp(const TravelApp());
@@ -106,6 +107,7 @@ class _TripListScreenState extends State<TripListScreen> {
   List<TripMeta>? _trips;
   bool _isLoading = false;
   String? _error;
+  String? _lastSynced;
 
   static const List<List<Color>> _coverGradients = [
     [Color(0xFF1A4A3A), Color(0xFF2A7A5F), Color(0xFF3ABFA0)],
@@ -118,6 +120,9 @@ class _TripListScreenState extends State<TripListScreen> {
   @override
   void initState() {
     super.initState();
+    SharedPreferences.getInstance().then((p) {
+      setState(() => _lastSynced = p.getString('last_synced'));
+    });
     TripService.fetchIndex().then((trips) {
       if (mounted) setState(() => _trips = trips);
     }).catchError((_) {});
@@ -130,7 +135,12 @@ class _TripListScreenState extends State<TripListScreen> {
     });
     try {
       final trips = await TripService.fetchIndex(forceRefresh: true);
-      setState(() => _trips = trips);
+      final now = DateTime.now().toIso8601String();
+      SharedPreferences.getInstance().then((p) => p.setString('last_synced', now));
+      setState(() {
+        _trips = trips;
+        _lastSynced = now;
+      });
     } catch (e) {
       setState(() => _error = e.toString());
     } finally {
@@ -145,7 +155,7 @@ class _TripListScreenState extends State<TripListScreen> {
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: _ListHeader(onSync: _sync, isLoading: _isLoading),
+            child: _ListHeader(onSync: _sync, isLoading: _isLoading, lastSynced: _lastSynced),
           ),
           if (_error != null)
             SliverToBoxAdapter(child: _ErrorBanner(message: _error!)),
@@ -174,7 +184,8 @@ class _TripListScreenState extends State<TripListScreen> {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 16),
                       child: _TripCard(
-                        name: trip.name,
+                        name: trip.displayName,
+                        dateRange: trip.modifiedAt.substring(0, 10),
                         gradient: gradient,
                         index: index,
                         onTap: () => Navigator.push(
@@ -220,7 +231,19 @@ class _TripListScreenState extends State<TripListScreen> {
 class _ListHeader extends StatelessWidget {
   final VoidCallback onSync;
   final bool isLoading;
-  const _ListHeader({required this.onSync, required this.isLoading});
+  final String? lastSynced;
+  const _ListHeader({required this.onSync, required this.isLoading, this.lastSynced});
+
+  String _formatLastSynced(String? isoString) {
+    if (isoString == null) return '';
+    final last = DateTime.tryParse(isoString);
+    if (last == null) return '';
+    final diff = DateTime.now().difference(last);
+    if (diff.inMinutes < 1) return 'Last synced: just now';
+    if (diff.inMinutes < 60) return 'Last synced: ${diff.inMinutes} min ago';
+    if (diff.inHours < 24) return 'Last synced: ${diff.inHours} hours ago';
+    return 'Last synced: ${diff.inDays} days ago';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -273,6 +296,13 @@ class _ListHeader extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           _SyncButton(onTap: onSync, isLoading: isLoading),
+          if (lastSynced != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              _formatLastSynced(lastSynced),
+              style: const TextStyle(fontSize: 11, color: AppColors.muted),
+            ),
+          ],
         ],
       ),
     );
@@ -440,11 +470,13 @@ class _SyncButton extends StatelessWidget {
 
 class _TripCard extends StatelessWidget {
   final String name;
+  final String dateRange;
   final List<Color> gradient;
   final VoidCallback onTap;
   final int index;
   const _TripCard(
       {required this.name,
+      required this.dateRange,
       required this.gradient,
       required this.onTap,
       required this.index});
@@ -525,17 +557,31 @@ class _TripCard extends StatelessWidget {
               bottom: 18,
               left: 18,
               right: 60,
-              child: Text(
-                name,
-                style: const TextStyle(
-                  fontSize: 22,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.5,
-                  height: 1.2,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.5,
+                      height: 1.2,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    dateRange,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Colors.white60,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -591,7 +637,7 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
           return Column(
             children: [
               _ImageHeader(
-                tripName: widget.meta.name,
+                tripName: widget.meta.displayName,
                 dayCount: trip.days.length,
               ),
               _DayNavBar(
