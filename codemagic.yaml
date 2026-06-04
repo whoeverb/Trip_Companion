@@ -21,7 +21,7 @@ workflows:
 
       - name: Build Unsigned iOS App Bundle
         script: |
-          flutter build ios --release --no-codesign --project-name="Runner" DEVELOPMENT_TEAM=TEAMXYZ123
+          flutter build ios --release --no-codesign DEVELOPMENT_TEAM=TEAMXYZ123
 
       - name: Clean Previous Assembly Artifacts
         script: |
