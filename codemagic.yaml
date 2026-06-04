@@ -4,7 +4,7 @@ workflows:
     # This sets the base directory for all scripts in this workflow
     working_directory: mobile_app 
     environment:
-      flutter: stable
+      flutter: 3.19.0
       groups:
         - macos_credentials
       vars:
