@@ -1,0 +1,45 @@
+workflows:
+  ios-build:
+    name: iOS Build
+    # This sets the base directory for all scripts in this workflow
+    working_directory: mobile_app 
+    environment:
+      flutter: stable
+      groups:
+        - macos_credentials
+      vars:
+        XCODE_WORKSPACE: "ios/Runner.xcworkspace" # Adjusted since working_dir is mobile_app
+        XCODE_SCHEME: "Runner"
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+    scripts:
+      - name: Fetch Flutter Dependencies
+        script: |
+          flutter pub get
+
+      - name: Build Unsigned iOS App Bundle
+        script: |
+          flutter build ios --release --no-codesign
+
+      - name: Clean Previous Assembly Artifacts
+        script: |
+          rm -rf Payload
+          rm -f *.ipa
+
+      - name: Assemble Traditional Payload Architecture
+        script: |
+          mkdir -p Payload
+          cp -r build/ios/iphoneos/Runner.app Payload/
+
+      - name: Pack IPA and Stage to Codemagic Output Directory
+        script: |
+          # Packaging it directly into the current directory (mobile_app/)
+          zip -r trip_companion.ipa Payload
+
+    artifacts:
+      # Codemagic searches relative to the working_directory
+      - trip_companion.ipa
