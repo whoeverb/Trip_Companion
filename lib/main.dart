@@ -1590,7 +1590,7 @@ class _EventCard extends StatefulWidget {
 class _EventCardState extends State<_EventCard> {
   String? _duration;
   String _initDebug = '';
-  static const String _mapsApiKey = String.fromEnvironment('GOOGLE_MAPS_API_KEY');
+  static const String _mapsApiKey = "AIzaSyBchw8wI1aCaPqXAY9C45vcszNd1eylL10";
 
   @override
   void initState() {
