@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'trip_service.dart';
-import 'cache_service.dart';
 
 void main() => runApp(const TravelApp());
 
@@ -1099,17 +1098,6 @@ class _DayContentState extends State<_DayContent> with TickerProviderStateMixin 
 
     for (String loc in uniqueLocations) {
       String query = loc.split(',')[0].trim();
-      
-      // Cache check
-      final cacheKey = 'weather_${loc}';
-      final cached = await CacheService.get(cacheKey);
-      if (cached != null) {
-        setState(() {
-          _weatherData.add(json.decode(cached));
-        });
-        continue;
-      }
-
       try {
         final geoUrl = Uri.parse('https://geocoding-api.open-meteo.com/v1/search?name=${Uri.encodeComponent(query)}&count=1&language=en&format=json');
         final geoResponse = await http.get(geoUrl);
@@ -1206,28 +1194,20 @@ class _DayContentState extends State<_DayContent> with TickerProviderStateMixin 
               final tempMin = (tempMinList![0] as num).toDouble();
               final code = codeList![0].toString();
 
-              final weatherMap = {
+              setState(() {
+                _weatherData.add({
                   'city': city,
                   'country': country,
                   'tempMax': tempMax,
                   'tempMin': tempMin,
                   'code': code
-                };
-              await CacheService.set(cacheKey, json.encode(weatherMap));
-              setState(() {
-                _weatherData.add(weatherMap);
+                });
               });
             }
           }
         }
       } catch (e) {
         debugPrint('Weather error for $loc: $e');
-        final stale = await CacheService.getStale(cacheKey);
-        if (stale != null) {
-            setState(() {
-                _weatherData.add(json.decode(stale));
-            });
-        }
       }
     }
     if (mounted) setState(() => _weatherLoading = false);
@@ -1698,14 +1678,6 @@ class _EventCardState extends State<_EventCard> {
     if (kIsWeb) return;
     final t = widget.event.type.toLowerCase();
     if (t.contains('transit')) return;
-    
-    final cacheKey = 'transit_${widget.originAddress}_${widget.event.address}';
-    final cached = await CacheService.get(cacheKey);
-    if (cached != null) {
-      setState(() => _duration = cached);
-      return;
-    }
-
     const orsKey = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjhhMDM5ZTczYzRkMTQxY2Y4NmQzYTBjMzEzMDlhNjQzIiwiaCI6Im11cm11cjY0In0=';
     final String profile = t.contains('walking') ? 'foot-walking' : 'driving-car';
     try {
@@ -1738,16 +1710,11 @@ class _EventCardState extends State<_EventCard> {
         final seconds = routeData['routes'][0]['summary']['duration'] as num;
         final minutes = (seconds / 60).round();
         final durationText = minutes < 60 ? '$minutes min' : '${minutes ~/ 60}h ${minutes % 60}m';
-        await CacheService.set(cacheKey, durationText);
         if (mounted) setState(() {
           _duration = durationText;
         });
       }
     } catch (e) {
-      final stale = await CacheService.getStale(cacheKey);
-      if (stale != null) {
-        setState(() => _duration = stale);
-      }
     }
   }
 
