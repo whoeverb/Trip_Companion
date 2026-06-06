@@ -1302,16 +1302,22 @@ class _DayContentState extends State<_DayContent> {
             ),
           )
         else
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: _weatherData.map((w) => _WeatherChip(
-              city: w['city'],
-              country: w['country'],
-              tempMax: w['tempMax'],
-              tempMin: w['tempMin'],
-              icon: w['code'],
-            )).toList(),
+          SizedBox(
+            height: 160,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(right: 4),
+              physics: const BouncingScrollPhysics(),
+              itemCount: _weatherData.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (_, i) => _WeatherChip(
+                city: _weatherData[i]['city'],
+                country: _weatherData[i]['country'],
+                tempMax: _weatherData[i]['tempMax'],
+                tempMin: _weatherData[i]['tempMin'],
+                icon: _weatherData[i]['code'],
+              ),
+            ),
           ),
         const SizedBox(height: 20),
         if (widget.day.lodgingTitle.isNotEmpty) ...[
