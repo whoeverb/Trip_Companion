@@ -1785,6 +1785,10 @@ class _EventCardState extends State<_EventCard> {
                           height: 1.3,
                         ),
                       ),
+                      Text(
+                        'key:${_mapsApiKey.isEmpty ? "EMPTY" : "ok(${_mapsApiKey.length})"} o:${widget.originAddress.length} a:${widget.event.address.length}',
+                        style: const TextStyle(fontSize: 8, color: AppColors.coral),
+                      ),
                       if (widget.event.address.isNotEmpty) ...[
                         const SizedBox(height: 5),
                         GestureDetector(
