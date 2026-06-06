@@ -14,18 +14,28 @@ workflows:
         script: |
           flutter pub get
 
-      - name: Build iOS App
+      - name: Generate Icons
         script: |
-          # Build the Flutter assets first
-          flutter build ios --release --no-codesign --config-only
-          # Build the Xcode project with signing disabled
-          xcodebuild -workspace ios/Runner.xcworkspace -scheme Runner -sdk iphoneos -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+          dart run flutter_launcher_icons
+
+      - name: Disable Code Signing in Xcode Project
+        script: |
+          cd ios
+          # Disable signing for all targets
+          sed -i '' 's/PRODUCT_BUNDLE_IDENTIFIER = /PRODUCT_BUNDLE_IDENTIFIER = /g' Runner.xcodeproj/project.pbxproj
+          # Set signing to manual with empty identity
+          /usr/libexec/PlistBuddy -c "Set :PROVISIONING_PROFILE_SPECIFIER ''" Runner.xcodeproj/project.pbxproj 2>/dev/null || true
+
+      - name: Build iOS App (No Code Sign)
+        script: |
+          flutter build ios --release --no-codesign
 
       - name: Package IPA
         script: |
           mkdir -p Payload
           cp -r build/ios/iphoneos/Runner.app Payload/
-          zip -r Runner.ipa Payload
+          zip -r Runner.ipa Payload/
+          echo "IPA created: $(du -sh Runner.ipa)"
 
     artifacts:
       - "Runner.ipa"
