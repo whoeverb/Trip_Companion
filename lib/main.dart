@@ -778,12 +778,19 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
                 onSelected: (i) => setState(() => _selectedDay = i),
               ),
               Expanded(
-                child: _DayContent(
-                  day: day,
-                  firstEventOrigin: day.lodgingAddress.isNotEmpty
-                      ? day.lodgingAddress
-                      : previousDayLodging,
-                  key: ValueKey(_selectedDay),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  ),
+                  child: _DayContent(
+                    day: day,
+                    firstEventOrigin: day.lodgingAddress.isNotEmpty
+                        ? day.lodgingAddress
+                        : previousDayLodging,
+                    key: ValueKey(_selectedDay),
+                  ),
                 ),
               ),
             ],
