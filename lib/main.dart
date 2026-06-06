@@ -1605,6 +1605,7 @@ class _EventCardState extends State<_EventCard> {
 
   Future<void> _fetchTravelTime() async {
     if (kIsWeb) return;
+    debugPrint('🗺 fetchTravelTime called: type=${widget.event.type} origin=${widget.originAddress} dest=${widget.event.address}');
     final t = widget.event.type.toLowerCase();
     final String mode;
     if (t.contains('transit')) {
@@ -1623,6 +1624,8 @@ class _EventCardState extends State<_EventCard> {
 
     try {
       final response = await http.get(uri);
+      debugPrint('🗺 response status: ${response.statusCode}');
+      debugPrint('🗺 response body: ${response.body}');
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         final rows = data['rows'] as List<dynamic>?;
@@ -1638,7 +1641,7 @@ class _EventCardState extends State<_EventCard> {
           }
         }
       }
-    } catch (e) { debugPrint('Travel time error: $e'); }
+    } catch (e) { debugPrint('🗺 Travel time error: $e'); }
   }
 
   Future<void> _launchMaps(String address) async {
