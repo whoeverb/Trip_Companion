@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'cache_service.dart';
+import 'main.dart' show Trip, TripDay, Event;
 
 class TripMeta {
   final String name;
