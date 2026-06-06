@@ -21,35 +21,60 @@ workflows:
       - name: Patch Xcode project to disable all code signing
         script: |
           PROJECT_FILE="ios/Runner.xcodeproj/project.pbxproj"
-          
-          # Remove any development team
           sed -i '' 's/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM = "";/g' "$PROJECT_FILE"
-          
-          # Set provisioning style to Manual
           sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' "$PROJECT_FILE"
-          
-          # Clear provisioning profile specifier
           sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = [^;]*;/PROVISIONING_PROFILE_SPECIFIER = "";/g' "$PROJECT_FILE"
-          
-          # Disable code signing requirement
           sed -i '' 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' "$PROJECT_FILE"
           sed -i '' 's/CODE_SIGNING_ALLOWED = YES;/CODE_SIGNING_ALLOWED = NO;/g' "$PROJECT_FILE"
-
-          # Set code sign identity to empty for all configurations
           sed -i '' 's/CODE_SIGN_IDENTITY = [^;]*;/CODE_SIGN_IDENTITY = "";/g' "$PROJECT_FILE"
           sed -i '' 's/\"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]\" = [^;]*;/"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";/g' "$PROJECT_FILE"
 
-          echo "Patched project.pbxproj:"
-          grep -E "(DEVELOPMENT_TEAM|CODE_SIGN|PROVISIONING)" "$PROJECT_FILE" | sort -u
-
-      - name: Build iOS App (No Code Sign)
+      - name: Generate Flutter assets and engine
         script: |
-          flutter build ios --release --no-codesign
+          # This generates the Flutter.framework and assets without the signing check
+          flutter build ios --release --no-codesign --config-only || true
+
+      - name: Build with xcodebuild directly
+        script: |
+          xcodebuild \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_ENTITLEMENTS="" \
+            DEVELOPMENT_TEAM="" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            EXPANDED_CODE_SIGN_IDENTITY="" \
+            EXPANDED_CODE_SIGN_IDENTITY_HASH="" \
+            -allowProvisioningUpdates \
+            BUILD_DIR="$(pwd)/build/ios" \
+            | xcpretty || xcodebuild \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_ENTITLEMENTS="" \
+            DEVELOPMENT_TEAM="" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            EXPANDED_CODE_SIGN_IDENTITY="" \
+            EXPANDED_CODE_SIGN_IDENTITY_HASH="" \
+            BUILD_DIR="$(pwd)/build/ios"
 
       - name: Package IPA
         script: |
+          # Find the .app — xcodebuild may nest it differently
+          APP_PATH=$(find build/ios -name "Runner.app" -type d | head -1)
+          echo "Found app at: $APP_PATH"
           mkdir -p Payload
-          cp -r build/ios/iphoneos/Runner.app Payload/
+          cp -r "$APP_PATH" Payload/
           zip -r Runner.ipa Payload/
           echo "IPA size: $(du -sh Runner.ipa)"
 
