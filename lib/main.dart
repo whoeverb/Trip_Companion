@@ -1169,7 +1169,17 @@ class _DayContentState extends State<_DayContent> {
       if (i == 0) {
         origins.add(widget.firstEventOrigin);
       } else {
-        origins.add(widget.day.events[i - 1].address);
+        // Walk back to find the last non-empty address
+        String origin = '';
+        for (int j = i - 1; j >= 0; j--) {
+          if (widget.day.events[j].address.isNotEmpty) {
+            origin = widget.day.events[j].address;
+            break;
+          }
+        }
+        // If no previous event had an address, fall back to lodging
+        if (origin.isEmpty) origin = widget.firstEventOrigin;
+        origins.add(origin);
       }
     }
     return origins;
