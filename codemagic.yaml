@@ -18,13 +18,29 @@ workflows:
         script: |
           dart run flutter_launcher_icons
 
-      - name: Disable Code Signing in Xcode Project
+      - name: Patch Xcode project to disable all code signing
         script: |
-          cd ios
-          # Disable signing for all targets
-          sed -i '' 's/PRODUCT_BUNDLE_IDENTIFIER = /PRODUCT_BUNDLE_IDENTIFIER = /g' Runner.xcodeproj/project.pbxproj
-          # Set signing to manual with empty identity
-          /usr/libexec/PlistBuddy -c "Set :PROVISIONING_PROFILE_SPECIFIER ''" Runner.xcodeproj/project.pbxproj 2>/dev/null || true
+          PROJECT_FILE="ios/Runner.xcodeproj/project.pbxproj"
+          
+          # Remove any development team
+          sed -i '' 's/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM = "";/g' "$PROJECT_FILE"
+          
+          # Set provisioning style to Manual
+          sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' "$PROJECT_FILE"
+          
+          # Clear provisioning profile specifier
+          sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = [^;]*;/PROVISIONING_PROFILE_SPECIFIER = "";/g' "$PROJECT_FILE"
+          
+          # Disable code signing requirement
+          sed -i '' 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' "$PROJECT_FILE"
+          sed -i '' 's/CODE_SIGNING_ALLOWED = YES;/CODE_SIGNING_ALLOWED = NO;/g' "$PROJECT_FILE"
+
+          # Set code sign identity to empty for all configurations
+          sed -i '' 's/CODE_SIGN_IDENTITY = [^;]*;/CODE_SIGN_IDENTITY = "";/g' "$PROJECT_FILE"
+          sed -i '' 's/\"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]\" = [^;]*;/"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";/g' "$PROJECT_FILE"
+
+          echo "Patched project.pbxproj:"
+          grep -E "(DEVELOPMENT_TEAM|CODE_SIGN|PROVISIONING)" "$PROJECT_FILE" | sort -u
 
       - name: Build iOS App (No Code Sign)
         script: |
@@ -35,7 +51,7 @@ workflows:
           mkdir -p Payload
           cp -r build/ios/iphoneos/Runner.app Payload/
           zip -r Runner.ipa Payload/
-          echo "IPA created: $(du -sh Runner.ipa)"
+          echo "IPA size: $(du -sh Runner.ipa)"
 
     artifacts:
       - "Runner.ipa"
