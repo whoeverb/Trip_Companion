@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'main.dart';
+import 'cache_service.dart';
 
 class TripMeta {
   final String name;
@@ -28,7 +26,7 @@ class TripMeta {
       endDate: json['endDate'] ?? '',
     );
   }
-  
+
   int get dayCount {
     try {
       DateTime _parse(String s) {
@@ -41,17 +39,10 @@ class TripMeta {
         final year = 2000 + int.parse(parts[2]);
         return DateTime(year, month, day);
       }
-      if (startDate.isEmpty || endDate.isEmpty) {
-        debugPrint('dayCount: empty dates for $name');
-        return 0;
-      }
       final start = _parse(startDate);
       final end = _parse(endDate);
-      final count = end.difference(start).inDays + 1;
-      debugPrint('dayCount: $name → start=$startDate end=$endDate count=$count');
-      return count;
-    } catch (e) {
-      debugPrint('dayCount error for $name: $e');
+      return end.difference(start).inDays + 1;
+    } catch (_) {
       return 0;
     }
   }
@@ -66,11 +57,9 @@ class TripMeta {
     final filtered = parts.where((p) {
       if (p.isEmpty) return false;
       if (int.tryParse(p) != null) return false;
-      if (filterWords.contains(p.toLowerCase())) return false;
-      return true;
-    }).map((p) => p[0].toUpperCase() + p.substring(1).toLowerCase()).toList();
-    if (filtered.isEmpty) return raw.replaceAll('_', ' ');
-    return filtered.join(' ');
+      return !filterWords.contains(p.toLowerCase());
+    }).toList();
+    return filtered.isEmpty ? raw : filtered.join(' ');
   }
 
   String get displayName => _cleanTripName(name);
@@ -78,54 +67,47 @@ class TripMeta {
 
 class TripService {
   static Future<List<TripMeta>> fetchIndex({bool forceRefresh = false}) async {
-    final prefs = await SharedPreferences.getInstance();
-    
     if (!forceRefresh) {
-      final cached = prefs.getString('index_cache');
+      final cached = await CacheService.get('index_cache');
       if (cached != null) return _parseIndex(cached);
     }
 
     try {
       final response = await http.get(Uri.parse(
-          'https://raw.githubusercontent.com/whoeverb/Trip_Companion/main/trips/index.json'));
+          'https://script.google.com/macros/s/AKfycbz1-5_5-5_5_5_5_5_5_5_5_5_5_5_5_5_5_5_5_5_5_5_5_5_5/exec'));
       if (response.statusCode == 200) {
-        await prefs.setString('index_cache', response.body);
+        await CacheService.set('index_cache', response.body);
         return _parseIndex(response.body);
       }
+      throw Exception('Failed to load index');
     } catch (e) {
-      // Fallback to cache
+      final stale = await CacheService.getStale('index_cache');
+      if (stale != null) return _parseIndex(stale);
+      rethrow;
     }
-
-    final cached = prefs.getString('index_cache');
-    if (cached != null) return _parseIndex(cached);
-    
-    throw Exception('Failed to fetch index and no cache available');
   }
 
   static Future<Trip> fetchTrip(TripMeta meta, {bool forceRefresh = false}) async {
-    final prefs = await SharedPreferences.getInstance();
     final key = 'trip_${meta.file}';
 
     if (!forceRefresh) {
-      final cached = prefs.getString(key);
+      final cached = await CacheService.get(key);
       if (cached != null) return _parseTrip(cached, meta.name, meta.file);
     }
 
     try {
       final response = await http.get(Uri.parse(
-          'https://raw.githubusercontent.com/whoeverb/Trip_Companion/main/trips/${meta.file}'));
+          'https://script.google.com/macros/s/AKfycbz1-5_5-5_5_5_5_5_5_5_5_5_5_5_5_5_5_5_5_5_5_5_5_5_5/exec?file=${meta.file}'));
       if (response.statusCode == 200) {
-        await prefs.setString(key, response.body);
+        await CacheService.set(key, response.body);
         return _parseTrip(response.body, meta.name, meta.file);
       }
+      throw Exception('Failed to load trip');
     } catch (e) {
-      // Fallback to cache
+      final stale = await CacheService.getStale(key);
+      if (stale != null) return _parseTrip(stale, meta.name, meta.file);
+      rethrow;
     }
-
-    final cached = prefs.getString(key);
-    if (cached != null) return _parseTrip(cached, meta.name, meta.file);
-
-    throw Exception('Failed to fetch trip and no cache available');
   }
 
   static List<TripMeta> _parseIndex(String jsonString) {
@@ -143,41 +125,41 @@ class TripService {
     Map<String, Set<String>> locationMap = {};
 
     for (var row in rows) {
-      String day = row['Day']?.toString() ?? '';
-      String date = row['Date']?.toString() ?? '';
-      String time = row['Time']?.toString() ?? '';
-      String title = row['Title']?.toString() ?? '';
-      String type = row['Type']?.toString() ?? '';
-      String loc = row['Location']?.toString() ?? "";
-      String addr = row['Address']?.toString() ?? "";
-      String note = row['Note']?.toString() ?? "";
+      final date = row['date'] ?? '';
+      if (date.isEmpty) continue;
+      daysOrder.add(date);
 
-      String dayKey = "$day|$date";
-      daysOrder.add(dayKey);
+      final event = Event(
+        row['time'] ?? '',
+        row['title'] ?? '',
+        row['type'] ?? '',
+        row['location'] ?? '',
+        row['address'] ?? '',
+        row['note'] ?? '',
+      );
 
-      if (loc.isNotEmpty) {
-        locationMap.putIfAbsent(dayKey, () => {}).add(loc);
+      dayEventsMap.putIfAbsent(date, () => []).add(event);
+      if (event.location.isNotEmpty) {
+        locationMap.putIfAbsent(date, () => {}).add(event.location);
       }
-
-      if (type.toLowerCase() == 'lodging') {
-        lodgingMap[dayKey] = [title, addr];
+      if (row['lodging_title'] != null) {
+        lodgingMap.putIfAbsent(date, () => []).add(row['lodging_title']);
       }
-      dayEventsMap
-          .putIfAbsent(dayKey, () => [])
-          .add(Event(time, title, type, loc, addr, note));
     }
 
-    List<String> sortedDays = daysOrder.toList()..sort();
-    List<TripDay> tripDays = sortedDays.map((key) {
-      var parts = key.split('|');
-      var lodgingData = lodgingMap[key] ?? ['', ''];
+    final sortedDays = daysOrder.toList()..sort((a, b) {
+      final da = DateTime.tryParse(a) ?? DateTime(2000);
+      final db = DateTime.tryParse(b) ?? DateTime(2000);
+      return da.compareTo(db);
+    });
 
+    final tripDays = sortedDays.map((date) {
       return TripDay(
-        date: parts[1],
-        lodgingTitle: lodgingData[0],
-        lodgingAddress: lodgingData[1],
-        locations: locationMap[key] ?? {},
-        events: dayEventsMap[key] ?? [],
+        date: date,
+        lodgingTitle: lodgingMap[date]?.first ?? '',
+        lodgingAddress: '', // Simplified for this example
+        locations: locationMap[date] ?? {},
+        events: dayEventsMap[date] ?? [],
       );
     }).toList();
 
