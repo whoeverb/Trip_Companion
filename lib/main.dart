@@ -1589,11 +1589,13 @@ class _EventCard extends StatefulWidget {
 
 class _EventCardState extends State<_EventCard> {
   String? _duration;
+  String _initDebug = '';
   static const String _mapsApiKey = String.fromEnvironment('GOOGLE_MAPS_API_KEY');
 
   @override
   void initState() {
     super.initState();
+    _initDebug = 'o:${widget.originAddress.length} a:${widget.event.address.length}';
     final t = widget.event.type.toLowerCase();
     if (widget.originAddress.isNotEmpty &&
         widget.event.address.isNotEmpty &&
