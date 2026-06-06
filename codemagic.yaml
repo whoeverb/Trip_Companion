@@ -55,8 +55,7 @@ workflows:
             EXPANDED_CODE_SIGN_IDENTITY="" \
             EXPANDED_CODE_SIGN_IDENTITY_HASH="" \
             BUILD_DIR="$(pwd)/build/ios" \
-            DART_DEFINES="GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY"
-            
+
       - name: Find and verify app bundle
         script: |
           echo "=== Searching entire build directory ==="
