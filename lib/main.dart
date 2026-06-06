@@ -165,7 +165,7 @@ class _TripListScreenState extends State<TripListScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF0F1117), Color(0xFF0D1018), Color(0xFF0B0F1A)],
+                colors: [Color(0xFF0F1117), Color(0xFF0C1020), Color(0xFF08102A)],
               ),
             ),
           ),
@@ -173,8 +173,8 @@ class _TripListScreenState extends State<TripListScreen> {
             decoration: const BoxDecoration(
               gradient: RadialGradient(
                 center: Alignment.bottomCenter,
-                radius: 0.9,
-                colors: [Color(0x0D2ABFAA), Colors.transparent],
+                radius: 1.2,
+                colors: [Color(0x552ABFAA), Colors.transparent],
               ),
             ),
           ),
