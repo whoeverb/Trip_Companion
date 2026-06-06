@@ -1590,14 +1590,10 @@ class _EventCard extends StatefulWidget {
 
 class _EventCardState extends State<_EventCard> {
   String? _duration;
-  String? _debugInfo;
-  String _initDebug = '';
-  static const String _mapsApiKey = "AIzaSyBchw8wI1aCaPqXAY9C45vcszNd1eylL10";
 
   @override
   void initState() {
     super.initState();
-    _initDebug = 'o:${widget.originAddress.length} a:${widget.event.address.length}';
     final t = widget.event.type.toLowerCase();
     if (widget.originAddress.isNotEmpty &&
         widget.event.address.isNotEmpty &&
@@ -1612,9 +1608,8 @@ class _EventCardState extends State<_EventCard> {
     final t = widget.event.type.toLowerCase();
     if (t.contains('transit')) return;
     const orsKey = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjhhMDM5ZTczYzRkMTQxY2Y4NmQzYTBjMzEzMDlhNjQzIiwiaCI6Im11cm11cjY0In0=';
-    final String profile = t.contains('driving') ? 'driving-car' : 'foot-walking';
+    final String profile = t.contains('walking') ? 'foot-walking' : 'driving-car';
     try {
-      if (mounted) setState(() => _debugInfo = 'geocoding...');
       // Geocode origin
       final originGeo = await http.get(Uri.parse(
           'https://api.openrouteservice.org/geocode/search?api_key=$orsKey&text=${Uri.encodeComponent(widget.originAddress)}&size=1'));
@@ -1625,7 +1620,6 @@ class _EventCardState extends State<_EventCard> {
           'https://api.openrouteservice.org/geocode/search?api_key=$orsKey&text=${Uri.encodeComponent(widget.event.address)}&size=1'));
       final destData = json.decode(destGeo.body);
       final destCoords = destData['features'][0]['geometry']['coordinates'];
-      if (mounted) setState(() => _debugInfo = 'routing...');
       // Get directions
       final routeResponse = await http.post(
         Uri.parse('https://api.openrouteservice.org/v2/directions/$profile'),
@@ -1640,7 +1634,6 @@ class _EventCardState extends State<_EventCard> {
           ]
         }),
       );
-      if (mounted) setState(() => _debugInfo = 's:${routeResponse.statusCode}');
       if (routeResponse.statusCode == 200) {
         final routeData = json.decode(routeResponse.body);
         final seconds = routeData['routes'][0]['summary']['duration'] as num;
@@ -1648,11 +1641,9 @@ class _EventCardState extends State<_EventCard> {
         final durationText = minutes < 60 ? '$minutes min' : '${minutes ~/ 60}h ${minutes % 60}m';
         if (mounted) setState(() {
           _duration = durationText;
-          _debugInfo = null;
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _debugInfo = 'err:${e.toString().substring(0, 40)}');
     }
   }
 
@@ -1766,8 +1757,8 @@ class _EventCardState extends State<_EventCard> {
                                 children: [
                                   Icon(
                                     t.contains('transit') ? Icons.directions_transit_rounded
-                                      : t.contains('driving') ? Icons.directions_car_rounded
-                                      : Icons.directions_walk_rounded,
+                                      : t.contains('walking') ? Icons.directions_walk_rounded
+                                      : Icons.directions_car_rounded,
                                     size: 10,
                                     color: AppColors.blue,
                                   ),
@@ -1795,12 +1786,6 @@ class _EventCardState extends State<_EventCard> {
                           height: 1.3,
                         ),
                       ),
-                      Text(
-                        'key:${_mapsApiKey.isEmpty ? "EMPTY" : "ok(${_mapsApiKey.length})"} o:${widget.originAddress.length} a:${widget.event.address.length}',
-                        style: const TextStyle(fontSize: 8, color: AppColors.coral),
-                      ),
-                      if (_debugInfo != null)
-                        Text(_debugInfo!, style: const TextStyle(fontSize: 8, color: AppColors.amber)),
                       if (widget.event.address.isNotEmpty) ...[
                         const SizedBox(height: 5),
                         GestureDetector(
