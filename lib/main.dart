@@ -1294,37 +1294,41 @@ class _DayContentState extends State<_DayContent> {
         const SizedBox(height: 16),
         ...List.generate(
           widget.day.events.length,
-          (i) => Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 24,
-                child: Column(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: _EventCard.getEventColor(widget.day.events[i].type),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    if (i < widget.day.events.length - 1)
+          (i) => IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 24,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
                       Container(
-                        width: 1.5,
-                        height: 100,
-                        color: AppColors.cardBorder,
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: AppColors.teal,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                  ],
+                      if (i < widget.day.events.length - 1)
+                        Expanded(
+                          child: Container(
+                            width: 1.5,
+                            color: AppColors.teal,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: _EventCard(
-                  event: widget.day.events[i],
-                  originAddress: origins[i],
+                Expanded(
+                  child: _EventCard(
+                    event: widget.day.events[i],
+                    originAddress: origins[i],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
