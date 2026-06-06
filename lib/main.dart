@@ -4,6 +4,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'trip_service.dart';
 
@@ -1589,6 +1590,7 @@ class _EventCard extends StatefulWidget {
 
 class _EventCardState extends State<_EventCard> {
   String? _duration;
+  String? _debugInfo;
   String _initDebug = '';
   static const String _mapsApiKey = "AIzaSyBchw8wI1aCaPqXAY9C45vcszNd1eylL10";
 
@@ -1607,6 +1609,7 @@ class _EventCardState extends State<_EventCard> {
 
   Future<void> _fetchTravelTime() async {
     if (kIsWeb) return;
+    setState(() => _debugInfo = 'calling...');
     debugPrint('🗺 fetchTravelTime called: type=${widget.event.type} origin=${widget.originAddress} dest=${widget.event.address}');
     final t = widget.event.type.toLowerCase();
     final String mode;
@@ -1629,6 +1632,7 @@ class _EventCardState extends State<_EventCard> {
       debugPrint('🗺 response status: ${response.statusCode}');
       debugPrint('🗺 response body: ${response.body}');
       if (response.statusCode == 200) {
+        if (mounted) setState(() => _debugInfo = 's:${response.statusCode} ${response.body.substring(0, min(60, response.body.length))}');
         final data = json.decode(response.body) as Map<String, dynamic>;
         final rows = data['rows'] as List<dynamic>?;
         if (rows != null && rows.isNotEmpty) {
@@ -1643,7 +1647,10 @@ class _EventCardState extends State<_EventCard> {
           }
         }
       }
-    } catch (e) { debugPrint('🗺 Travel time error: $e'); }
+    } catch (e) {
+      if (mounted) setState(() => _debugInfo = 'err:${e.toString().substring(0, 40)}');
+      debugPrint('🗺 Travel time error: $e');
+    }
   }
 
   Future<void> _launchMaps(String address) async {
@@ -1789,6 +1796,8 @@ class _EventCardState extends State<_EventCard> {
                         'key:${_mapsApiKey.isEmpty ? "EMPTY" : "ok(${_mapsApiKey.length})"} o:${widget.originAddress.length} a:${widget.event.address.length}',
                         style: const TextStyle(fontSize: 8, color: AppColors.coral),
                       ),
+                      if (_debugInfo != null)
+                        Text(_debugInfo!, style: const TextStyle(fontSize: 8, color: AppColors.amber)),
                       if (widget.event.address.isNotEmpty) ...[
                         const SizedBox(height: 5),
                         GestureDetector(
