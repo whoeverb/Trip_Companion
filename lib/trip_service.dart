@@ -28,6 +28,25 @@ class TripMeta {
     );
   }
   
+  int get dayCount {
+    try {
+      DateTime _parse(String s) {
+        final parts = s.split('/');
+        if (parts.length != 3) return DateTime.now();
+        final month = int.parse(parts[0]);
+        final day = int.parse(parts[1]);
+        final year = 2000 + int.parse(parts[2]);
+        return DateTime(year, month, day);
+      }
+      if (startDate.isEmpty || endDate.isEmpty) return 0;
+      final start = _parse(startDate);
+      final end = _parse(endDate);
+      return end.difference(start).inDays + 1;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   static String _cleanTripName(String raw) {
     final filterWords = {
       'trip', 'road', 'may', 'jan', 'feb', 'mar', 'apr', 'jun', 'jul',
