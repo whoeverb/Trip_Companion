@@ -1299,23 +1299,33 @@ class _DayContentState extends State<_DayContent> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  width: 24,
+                  width: 32,
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: AppColors.teal,
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: _EventCard.getEventColor(widget.day.events[i].type),
                           shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '${i + 1}',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                       if (i < widget.day.events.length - 1)
                         Expanded(
                           child: Container(
                             width: 1.5,
-                            color: AppColors.teal,
+                            color: AppColors.cardBorder,
                           ),
                         ),
                     ],
