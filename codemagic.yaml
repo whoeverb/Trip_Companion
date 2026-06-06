@@ -31,7 +31,6 @@ workflows:
 
       - name: Generate Flutter assets and engine
         script: |
-          # This generates the Flutter.framework and assets without the signing check
           flutter build ios --release --no-codesign --config-only || true
 
       - name: Build with xcodebuild directly
@@ -50,31 +49,39 @@ workflows:
             PROVISIONING_PROFILE_SPECIFIER="" \
             EXPANDED_CODE_SIGN_IDENTITY="" \
             EXPANDED_CODE_SIGN_IDENTITY_HASH="" \
-            -allowProvisioningUpdates \
-            BUILD_DIR="$(pwd)/build/ios" \
-            | xcpretty || xcodebuild \
-            -workspace ios/Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Release \
-            -sdk iphoneos \
-            -destination 'generic/platform=iOS' \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGN_ENTITLEMENTS="" \
-            DEVELOPMENT_TEAM="" \
-            PROVISIONING_PROFILE_SPECIFIER="" \
-            EXPANDED_CODE_SIGN_IDENTITY="" \
-            EXPANDED_CODE_SIGN_IDENTITY_HASH="" \
             BUILD_DIR="$(pwd)/build/ios"
+
+      - name: Find and verify app bundle
+        script: |
+          echo "=== Searching entire build directory ==="
+          find "$(pwd)/build" -name "*.app" -type d 2>/dev/null
+          echo ""
+          echo "=== Full build/ios tree (2 levels) ==="
+          find "$(pwd)/build/ios" -maxdepth 4 -type d 2>/dev/null
+          echo ""
+          echo "=== Looking for Info.plist anywhere ==="
+          find "$(pwd)/build" -name "Info.plist" 2>/dev/null
 
       - name: Package IPA
         script: |
-          # Find the .app — xcodebuild may nest it differently
-          APP_PATH=$(find build/ios -name "Runner.app" -type d | head -1)
-          echo "Found app at: $APP_PATH"
+          APP_PATH=$(find "$(pwd)/build" -name "Runner.app" -type d | grep -v "Intermediates" | head -1)
+          echo "Using app at: $APP_PATH"
+          
+          # Verify Info.plist exists before packaging
+          if [ ! -f "$APP_PATH/Info.plist" ]; then
+            echo "ERROR: Info.plist missing from $APP_PATH"
+            ls -la "$APP_PATH"
+            exit 1
+          fi
+          
+          echo "Info.plist found, proceeding..."
+          rm -rf Payload
           mkdir -p Payload
-          cp -r "$APP_PATH" Payload/
+          cp -r "$APP_PATH" Payload/Runner.app
+          
+          # Verify copy
+          ls -la Payload/Runner.app/
+          
           zip -r Runner.ipa Payload/
           echo "IPA size: $(du -sh Runner.ipa)"
 
