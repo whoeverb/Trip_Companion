@@ -157,75 +157,96 @@ class _TripListScreenState extends State<TripListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bg,
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: _ListHeader(onSync: _sync, isLoading: _isLoading, lastSynced: _lastSynced),
-          ),
-          if (_error != null)
-            SliverToBoxAdapter(child: _ErrorBanner(message: _error!)),
-          if (_trips != null)
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(24, 32, 24, 14),
-                child: Row(
-                  children: [
-                    _SectionLabel('YOUR TRIPS'),
-                    SizedBox(width: 12),
-                    Expanded(child: Divider(color: AppColors.cardBorder)),
-                  ],
-                ),
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF0F1117), Color(0xFF0D1018), Color(0xFF0B0F1A)],
               ),
             ),
-          if (_trips != null)
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 48),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final trip = _trips![index];
-                    debugPrint('trip: ${trip.name} startDate="${trip.startDate}" endDate="${trip.endDate}" dayCount=${trip.dayCount}');
-                    final gradient =
-                        _coverGradients[index % _coverGradients.length];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: _TripCard(
-                        name: trip.displayName,
-                        dateRange: (trip.startDate.isEmpty && trip.endDate.isEmpty)
-                          ? ''
-                          : trip.startDate == trip.endDate
-                            ? trip.startDate
-                            : '${trip.startDate} – ${trip.endDate}',
-                        gradient: gradient,
-                        index: index,
-                        dayCount: trip.dayCount,
-                        onTap: () => Navigator.push(
-                          context,
-                          _slideRoute(
-                            ItineraryScreen(
-                              meta: trip,
+          ),
+          Container(
+            decoration: const BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.bottomCenter,
+                radius: 0.9,
+                colors: [Color(0x0D2ABFAA), Colors.transparent],
+              ),
+            ),
+          ),
+          CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: _ListHeader(onSync: _sync, isLoading: _isLoading, lastSynced: _lastSynced),
+              ),
+              if (_error != null)
+                SliverToBoxAdapter(child: _ErrorBanner(message: _error!)),
+              if (_trips != null)
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(24, 32, 24, 14),
+                    child: Row(
+                      children: [
+                        _SectionLabel('YOUR TRIPS'),
+                        SizedBox(width: 12),
+                        Expanded(child: Divider(color: AppColors.cardBorder)),
+                      ],
+                    ),
+                  ),
+                ),
+              if (_trips != null)
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 48),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final trip = _trips![index];
+                        debugPrint('trip: ${trip.name} startDate="${trip.startDate}" endDate="${trip.endDate}" dayCount=${trip.dayCount}');
+                        final gradient =
+                            _coverGradients[index % _coverGradients.length];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: _TripCard(
+                            name: trip.displayName,
+                            dateRange: (trip.startDate.isEmpty && trip.endDate.isEmpty)
+                              ? ''
+                              : trip.startDate == trip.endDate
+                                ? trip.startDate
+                                : '${trip.startDate} – ${trip.endDate}',
+                            gradient: gradient,
+                            index: index,
+                            dayCount: trip.dayCount,
+                            onTap: () => Navigator.push(
+                              context,
+                              _slideRoute(
+                                ItineraryScreen(
+                                  meta: trip,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    );
-                  },
-                  childCount: _trips!.length,
-                ),
-              ),
-            ),
-          if (_trips == null)
-            _isInitialLoading
-                ? const SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                        child: CircularProgressIndicator(color: AppColors.teal)),
-                  )
-                : const SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: _EmptyState(),
+                        );
+                      },
+                      childCount: _trips!.length,
+                    ),
                   ),
+                ),
+              if (_trips == null)
+                _isInitialLoading
+                    ? const SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                            child: CircularProgressIndicator(color: AppColors.teal)),
+                      )
+                    : const SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: _EmptyState(),
+                      ),
+            ],
+          ),
         ],
       ),
     );
