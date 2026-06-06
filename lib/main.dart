@@ -1048,14 +1048,31 @@ class _DayContent extends StatefulWidget {
   State<_DayContent> createState() => _DayContentState();
 }
 
-class _DayContentState extends State<_DayContent> {
+class _DayContentState extends State<_DayContent> with TickerProviderStateMixin {
   List<Map<String, dynamic>> _weatherData = [];
   bool _weatherLoading = false;
+  final List<AnimationController> _cardControllers = [];
 
   @override
   void initState() {
     super.initState();
     _fetchWeather();
+    for (int i = 0; i < widget.day.events.length; i++) {
+      final controller = AnimationController(
+        duration: const Duration(milliseconds: 400),
+        vsync: this,
+      );
+      _cardControllers.add(controller);
+      Future.delayed(Duration(milliseconds: i * 60), () {
+        if (mounted) controller.forward();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final c in _cardControllers) { c.dispose(); }
+    super.dispose();
   }
 
   @override
@@ -1343,52 +1360,68 @@ class _DayContentState extends State<_DayContent> {
         const SizedBox(height: 16),
         ...List.generate(
           widget.day.events.length,
-          (i) => IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 32,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+          (i) {
+            final controller = i < _cardControllers.length
+                ? _cardControllers[i]
+                : AnimationController(duration: const Duration(milliseconds: 400), vsync: this)..forward();
+            final fade = CurvedAnimation(parent: controller, curve: Curves.easeOut);
+            final slide = Tween<Offset>(
+              begin: const Offset(0, 0.08),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOut));
+            return FadeTransition(
+              opacity: fade,
+              child: SlideTransition(
+                position: slide,
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: AppColors.teal,
-                          shape: BoxShape.circle,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '${i + 1}',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
+                      SizedBox(
+                        width: 32,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: AppColors.teal,
+                                shape: BoxShape.circle,
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                '${i + 1}',
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                            if (i < widget.day.events.length - 1)
+                              Expanded(
+                                child: Container(
+                                  width: 1.5,
+                                  color: AppColors.teal,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                      if (i < widget.day.events.length - 1)
-                        Expanded(
-                          child: Container(
-                            width: 1.5,
-                            color: AppColors.teal,
-                          ),
+                      Expanded(
+                        child: _EventCard(
+                          event: widget.day.events[i],
+                          originAddress: origins[i],
                         ),
+                      ),
                     ],
                   ),
                 ),
-                Expanded(
-                  child: _EventCard(
-                    event: widget.day.events[i],
-                    originAddress: origins[i],
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ],
     );
