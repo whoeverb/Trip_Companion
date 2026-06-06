@@ -1609,47 +1609,50 @@ class _EventCardState extends State<_EventCard> {
 
   Future<void> _fetchTravelTime() async {
     if (kIsWeb) return;
-    setState(() => _debugInfo = 'calling...');
-    debugPrint('🗺 fetchTravelTime called: type=${widget.event.type} origin=${widget.originAddress} dest=${widget.event.address}');
     final t = widget.event.type.toLowerCase();
-    final String mode;
-    if (t.contains('transit')) {
-      mode = 'transit';
-    } else if (t.contains('driving')) {
-      mode = 'driving';
-    } else {
-      mode = 'walking';
-    }
-    final uri = Uri.parse(
-        'https://maps.googleapis.com/maps/api/distancematrix/json'
-        '?origins=${Uri.encodeComponent(widget.originAddress)}'
-        '&destinations=${Uri.encodeComponent(widget.event.address)}'
-        '&mode=$mode'
-        '&key=$_mapsApiKey');
-
+    if (t.contains('transit')) return;
+    const orsKey = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjhhMDM5ZTczYzRkMTQxY2Y4NmQzYTBjMzEzMDlhNjQzIiwiaCI6Im11cm11cjY0In0=';
+    final String profile = t.contains('driving') ? 'driving-car' : 'foot-walking';
     try {
-      final response = await http.get(uri);
-      debugPrint('🗺 response status: ${response.statusCode}');
-      debugPrint('🗺 response body: ${response.body}');
-      if (response.statusCode == 200) {
-        if (mounted) setState(() => _debugInfo = 's:${response.statusCode} ${response.body.substring(0, min(60, response.body.length))}');
-        final data = json.decode(response.body) as Map<String, dynamic>;
-        final rows = data['rows'] as List<dynamic>?;
-        if (rows != null && rows.isNotEmpty) {
-          final elements = rows[0]['elements'] as List<dynamic>;
-          if (elements.isNotEmpty &&
-              elements[0]['status'] == 'OK') {
-            final durationText =
-                elements[0]['duration']['text'] as String;
-            if (mounted) {
-              setState(() => _duration = durationText);
-            }
-          }
-        }
+      if (mounted) setState(() => _debugInfo = 'geocoding...');
+      // Geocode origin
+      final originGeo = await http.get(Uri.parse(
+          'https://api.openrouteservice.org/geocode/search?api_key=$orsKey&text=${Uri.encodeComponent(widget.originAddress)}&size=1'));
+      final originData = json.decode(originGeo.body);
+      final originCoords = originData['features'][0]['geometry']['coordinates'];
+      // Geocode destination
+      final destGeo = await http.get(Uri.parse(
+          'https://api.openrouteservice.org/geocode/search?api_key=$orsKey&text=${Uri.encodeComponent(widget.event.address)}&size=1'));
+      final destData = json.decode(destGeo.body);
+      final destCoords = destData['features'][0]['geometry']['coordinates'];
+      if (mounted) setState(() => _debugInfo = 'routing...');
+      // Get directions
+      final routeResponse = await http.post(
+        Uri.parse('https://api.openrouteservice.org/v2/directions/$profile'),
+        headers: {
+          'Authorization': orsKey,
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'coordinates': [
+            [originCoords[0], originCoords[1]],
+            [destCoords[0], destCoords[1]],
+          ]
+        }),
+      );
+      if (mounted) setState(() => _debugInfo = 's:${routeResponse.statusCode}');
+      if (routeResponse.statusCode == 200) {
+        final routeData = json.decode(routeResponse.body);
+        final seconds = routeData['routes'][0]['summary']['duration'] as num;
+        final minutes = (seconds / 60).round();
+        final durationText = minutes < 60 ? '$minutes min' : '${minutes ~/ 60}h ${minutes % 60}m';
+        if (mounted) setState(() {
+          _duration = durationText;
+          _debugInfo = null;
+        });
       }
     } catch (e) {
       if (mounted) setState(() => _debugInfo = 'err:${e.toString().substring(0, 40)}');
-      debugPrint('🗺 Travel time error: $e');
     }
   }
 
