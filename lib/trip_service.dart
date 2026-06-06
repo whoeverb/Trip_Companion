@@ -31,7 +31,9 @@ class TripMeta {
   int get dayCount {
     try {
       DateTime _parse(String s) {
-        final parts = s.split('/');
+        // Strip optional weekday prefix e.g. "Fri 6/5/26" → "6/5/26"
+        final clean = s.contains(' ') ? s.split(' ').last : s;
+        final parts = clean.split('/');
         if (parts.length != 3) return DateTime.now();
         final month = int.parse(parts[0]);
         final day = int.parse(parts[1]);
