@@ -1586,9 +1586,10 @@ class _EventCardState extends State<_EventCard> {
   void initState() {
     super.initState();
     final t = widget.event.type.toLowerCase();
-    if ((t.contains('driving') || t.contains('transit')) &&
-        widget.originAddress.isNotEmpty &&
-        widget.event.address.isNotEmpty) {
+    if (widget.originAddress.isNotEmpty &&
+        widget.event.address.isNotEmpty &&
+        !t.contains('lodging') &&
+        !t.contains('flight')) {
       _fetchTravelTime();
     }
   }
@@ -1596,17 +1597,23 @@ class _EventCardState extends State<_EventCard> {
   Future<void> _fetchTravelTime() async {
     if (kIsWeb) return;
     final t = widget.event.type.toLowerCase();
-    final mode = t.contains('transit') ? 'transit' : 'driving';
-    final targetUrl =
+    final String mode;
+    if (t.contains('transit')) {
+      mode = 'transit';
+    } else if (t.contains('driving')) {
+      mode = 'driving';
+    } else {
+      mode = 'walking';
+    }
+    final uri = Uri.parse(
         'https://maps.googleapis.com/maps/api/distancematrix/json'
         '?origins=${Uri.encodeComponent(widget.originAddress)}'
         '&destinations=${Uri.encodeComponent(widget.event.address)}'
         '&mode=$mode'
-        '&key=$_mapsApiKey';
-    final proxyUrl = Uri.parse('https://corsproxy.io/?$targetUrl');
-    
+        '&key=$_mapsApiKey');
+
     try {
-      final response = await http.get(proxyUrl);
+      final response = await http.get(uri);
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         final rows = data['rows'] as List<dynamic>?;
