@@ -184,6 +184,7 @@ class _TripListScreenState extends State<TripListScreen> {
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     final trip = _trips![index];
+                    debugPrint('trip: ${trip.name} startDate="${trip.startDate}" endDate="${trip.endDate}" dayCount=${trip.dayCount}');
                     final gradient =
                         _coverGradients[index % _coverGradients.length];
                     return Padding(
