@@ -1308,7 +1308,7 @@ class _DayContentState extends State<_DayContent> {
                         width: 24,
                         height: 24,
                         decoration: BoxDecoration(
-                          color: _EventCard.getEventColor(widget.day.events[i].type),
+                          color: AppColors.teal,
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
@@ -1325,7 +1325,7 @@ class _DayContentState extends State<_DayContent> {
                         Expanded(
                           child: Container(
                             width: 1.5,
-                            color: AppColors.cardBorder,
+                            color: AppColors.teal,
                           ),
                         ),
                     ],
@@ -1702,13 +1702,20 @@ class _EventCardState extends State<_EventCard> {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            displayTime,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.muted,
-                              letterSpacing: 0.5,
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppColors.cardBorder,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              displayTime,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.inkSoft,
+                                letterSpacing: 0.5,
+                              ),
                             ),
                           ),
                           const Spacer(),
@@ -1791,13 +1798,14 @@ class _EventCardState extends State<_EventCard> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: const Color(0xFF252A38),
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(18),
                   bottomRight: Radius.circular(18),
                 ),
-                border: Border(
+                border: const Border(
                   top: BorderSide(color: AppColors.cardBorder),
+                  left: BorderSide(color: Color(0x406B6880), width: 3),
                 ),
               ),
               child: Row(
