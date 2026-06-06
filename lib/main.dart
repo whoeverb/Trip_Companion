@@ -1740,8 +1740,13 @@ class _EventCardState extends State<_EventCard> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.navigation_rounded,
-                                      size: 10, color: AppColors.blue),
+                                  Icon(
+                                    t.contains('transit') ? Icons.directions_transit_rounded
+                                      : t.contains('driving') ? Icons.directions_car_rounded
+                                      : Icons.directions_walk_rounded,
+                                    size: 10,
+                                    color: AppColors.blue,
+                                  ),
                                   const SizedBox(width: 4),
                                   Text(
                                     _duration!,
