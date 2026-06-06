@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart';
@@ -40,11 +41,17 @@ class TripMeta {
         final year = 2000 + int.parse(parts[2]);
         return DateTime(year, month, day);
       }
-      if (startDate.isEmpty || endDate.isEmpty) return 0;
+      if (startDate.isEmpty || endDate.isEmpty) {
+        debugPrint('dayCount: empty dates for $name');
+        return 0;
+      }
       final start = _parse(startDate);
       final end = _parse(endDate);
-      return end.difference(start).inDays + 1;
-    } catch (_) {
+      final count = end.difference(start).inDays + 1;
+      debugPrint('dayCount: $name → start=$startDate end=$endDate count=$count');
+      return count;
+    } catch (e) {
+      debugPrint('dayCount error for $name: $e');
       return 0;
     }
   }
