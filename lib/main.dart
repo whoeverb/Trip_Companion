@@ -197,6 +197,7 @@ class _TripListScreenState extends State<TripListScreen> {
                             : '${trip.startDate} – ${trip.endDate}',
                         gradient: gradient,
                         index: index,
+                        dayCount: 0,
                         onTap: () => Navigator.push(
                           context,
                           _slideRoute(
@@ -483,35 +484,85 @@ class _SyncButton extends StatelessWidget {
 
 // ─── Trip Card ───────────────────────────────────────────────────────────────
 
-class _TripCard extends StatelessWidget {
+class _TripCard extends StatefulWidget {
   final String name;
   final String dateRange;
   final List<Color> gradient;
   final VoidCallback onTap;
   final int index;
+  final int dayCount;
   const _TripCard(
       {required this.name,
       required this.dateRange,
       required this.gradient,
       required this.onTap,
-      required this.index});
+      required this.index,
+      required this.dayCount});
+
+  @override
+  State<_TripCard> createState() => _TripCardState();
+}
+
+class _TripCardState extends State<_TripCard> {
+  String? _imageUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchImage();
+  }
+
+  void _fetchImage() async {
+    final parts = widget.name.split('_');
+    final commonWords = {
+      'trip', 'may', 'jan', 'feb', 'mar', 'apr', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
+      'summer', 'winter', 'spring', 'fall'
+    };
+    final filtered = parts.where((p) {
+      final lower = p.toLowerCase();
+      if (int.tryParse(p) != null) return false;
+      if (commonWords.contains(lower)) return false;
+      return true;
+    }).toList();
+    
+    final queryParts = filtered.length > 2 ? filtered.sublist(filtered.length - 2) : filtered;
+    final query = queryParts.isEmpty ? 'travel landscape' : queryParts.join(' ');
+
+    try {
+      final url = Uri.parse('https://api.unsplash.com/search/photos?query=${Uri.encodeComponent(query)}&client_id=kBduwH2JVZAUVQ-Y_6gHJJJJguTjibCMy3GDis59FpY&per_page=1&orientation=landscape&content_filter=high&order_by=relevant');
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['results'] != null && (data['results'] as List).isNotEmpty) {
+          if (mounted) setState(() => _imageUrl = data['results'][0]['urls']['regular']);
+        }
+      }
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: Container(
-        height: 160,
+        height: 210,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           gradient: LinearGradient(
-            colors: gradient,
+            colors: widget.gradient,
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
         child: Stack(
           children: [
+            if (_imageUrl != null)
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.network(_imageUrl!, fit: BoxFit.cover, width: double.infinity, height: double.infinity),
+                ),
+              ),
             Positioned.fill(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
@@ -558,7 +609,7 @@ class _TripCard extends StatelessWidget {
                       Border.all(color: Colors.white.withOpacity(0.2)),
                 ),
                 child: Text(
-                  'TRIP ${index + 1}',
+                  '${widget.dayCount} DAYS',
                   style: const TextStyle(
                     fontSize: 9,
                     letterSpacing: 1.5,
@@ -577,7 +628,7 @@ class _TripCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    name,
+                    widget.name,
                     style: const TextStyle(
                       fontSize: 22,
                       color: Colors.white,
@@ -590,7 +641,7 @@ class _TripCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    dateRange,
+                    widget.dateRange,
                     style: const TextStyle(
                       fontSize: 11,
                       color: Colors.white60,
