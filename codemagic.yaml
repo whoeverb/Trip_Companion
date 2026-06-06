@@ -29,9 +29,14 @@ workflows:
           sed -i '' 's/CODE_SIGN_IDENTITY = [^;]*;/CODE_SIGN_IDENTITY = "";/g' "$PROJECT_FILE"
           sed -i '' 's/\"CODE_SIGN_IDENTITY\[sdk=iphoneos\*\]\" = [^;]*;/"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";/g' "$PROJECT_FILE"
 
+      - name: Inject API key into Info.plist
+        script: |
+          /usr/libexec/PlistBuddy -c "Add :GOOGLE_MAPS_API_KEY string $GOOGLE_MAPS_API_KEY" ios/Runner/Info.plist
+
       - name: Generate Flutter assets and engine
         script: |
-          flutter build ios --release --no-codesign --config-only || true
+          flutter build ios --release --no-codesign --config-only \
+            --dart-define=GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY || true
 
       - name: Build with xcodebuild directly
         script: |
@@ -49,8 +54,9 @@ workflows:
             PROVISIONING_PROFILE_SPECIFIER="" \
             EXPANDED_CODE_SIGN_IDENTITY="" \
             EXPANDED_CODE_SIGN_IDENTITY_HASH="" \
-            BUILD_DIR="$(pwd)/build/ios"
-
+            BUILD_DIR="$(pwd)/build/ios" \
+            DART_DEFINES="GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY"
+            
       - name: Find and verify app bundle
         script: |
           echo "=== Searching entire build directory ==="
