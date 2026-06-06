@@ -1294,9 +1294,37 @@ class _DayContentState extends State<_DayContent> {
         const SizedBox(height: 16),
         ...List.generate(
           widget.day.events.length,
-          (i) => _EventCard(
-            event: widget.day.events[i],
-            originAddress: origins[i],
+          (i) => Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 24,
+                child: Column(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: _EventCard.getEventColor(widget.day.events[i].type),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    if (i < widget.day.events.length - 1)
+                      Container(
+                        width: 1.5,
+                        height: 100,
+                        color: AppColors.cardBorder,
+                      ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: _EventCard(
+                  event: widget.day.events[i],
+                  originAddress: origins[i],
+                ),
+              ),
+            ],
           ),
         ),
       ],
@@ -1521,6 +1549,16 @@ class _EventCard extends StatefulWidget {
   final String originAddress;
   const _EventCard({required this.event, required this.originAddress});
 
+  static Color getEventColor(String type) {
+    final t = type.toLowerCase();
+    if (t.contains('driving')) return AppColors.inkSoft;
+    if (t.contains('dining')) return AppColors.amber;
+    if (t.contains('activity')) return AppColors.teal;
+    if (t.contains('transit')) return AppColors.blue;
+    if (t.contains('flight')) return AppColors.violet;
+    return AppColors.teal;
+  }
+
   @override
   State<_EventCard> createState() => _EventCardState();
 }
@@ -1585,31 +1623,25 @@ class _EventCardState extends State<_EventCard> {
   Widget build(BuildContext context) {
     final t = widget.event.type.toLowerCase();
     IconData icon;
-    Color accent;
+    Color accent = _EventCard.getEventColor(widget.event.type);
     Color bg;
     if (t.contains('driving')) {
       icon = Icons.directions_car_rounded;
-      accent = AppColors.inkSoft;
       bg = AppColors.card;
     } else if (t.contains('dining')) {
       icon = Icons.restaurant_rounded;
-      accent = AppColors.amber;
       bg = AppColors.amberGlow;
     } else if (t.contains('activity')) {
       icon = Icons.explore_rounded;
-      accent = AppColors.teal;
       bg = AppColors.tealGlow;
     } else if (t.contains('transit')) {
       icon = Icons.directions_transit_rounded;
-      accent = AppColors.blue;
       bg = AppColors.blueGlow;
     } else if (t.contains('flight')) {
       icon = Icons.flight_rounded;
-      accent = AppColors.violet;
       bg = AppColors.violetGlow;
     } else {
       icon = Icons.radio_button_checked_rounded;
-      accent = AppColors.teal;
       bg = AppColors.tealGlow;
     }
 
