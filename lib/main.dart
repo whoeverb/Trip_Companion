@@ -198,7 +198,7 @@ class _TripListScreenState extends State<TripListScreen> {
                             : '${trip.startDate} – ${trip.endDate}',
                         gradient: gradient,
                         index: index,
-                        dayCount: 0,
+                        dayCount: trip.dayCount,
                         onTap: () => Navigator.push(
                           context,
                           _slideRoute(
