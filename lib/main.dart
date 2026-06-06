@@ -302,24 +302,61 @@ class _ListHeader extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           const Text(
-            'Your\nJourneys',
+            'Hi Kenny,',
             style: TextStyle(
-              fontSize: 40,
+              fontSize: 17,
+              color: AppColors.muted,
+              fontWeight: FontWeight.w500,
+              letterSpacing: -0.3,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Where to next?',
+            style: TextStyle(
+              fontSize: 34,
               height: 1.1,
               color: AppColors.ink,
               fontWeight: FontWeight.w700,
               letterSpacing: -1,
             ),
           ),
-          const SizedBox(height: 24),
-          _SyncButton(onTap: onSync, isLoading: isLoading),
-          if (lastSynced != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              _formatLastSynced(lastSynced),
-              style: const TextStyle(fontSize: 11, color: AppColors.muted),
-            ),
-          ],
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              GestureDetector(
+                onTap: isLoading ? null : onSync,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: AppColors.tealGlow,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: AppColors.teal.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      isLoading
+                        ? const SizedBox(width: 12, height: 12,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.teal))
+                        : const Icon(Icons.sync_rounded, size: 13, color: AppColors.teal),
+                      const SizedBox(width: 6),
+                      Text(
+                        isLoading ? 'Syncing…' : 'Sync',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.teal),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              if (lastSynced != null)
+                Text(
+                  _formatLastSynced(lastSynced),
+                  style: const TextStyle(fontSize: 11, color: AppColors.muted),
+                ),
+            ],
+          ),
         ],
       ),
     );
