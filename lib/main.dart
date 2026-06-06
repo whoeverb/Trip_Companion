@@ -1705,8 +1705,9 @@ class _EventCardState extends State<_EventCard> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: AppColors.cardBorder,
+                              color: AppColors.surface,
                               borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: AppColors.cardBorder),
                             ),
                             child: Text(
                               displayTime,
@@ -1798,14 +1799,13 @@ class _EventCardState extends State<_EventCard> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFF252A38),
+                color: AppColors.surface,
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(18),
                   bottomRight: Radius.circular(18),
                 ),
                 border: const Border(
                   top: BorderSide(color: AppColors.cardBorder),
-                  left: BorderSide(color: Color(0x406B6880), width: 3),
                 ),
               ),
               child: Row(
