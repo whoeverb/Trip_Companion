@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart';
+import 'cache_service.dart';
 
 class TripMeta {
   final String name;
@@ -86,10 +87,13 @@ class TripService {
     }
 
     try {
+      final cached = await CacheService.get('index_cache');
+      if (cached != null) return _parseIndex(cached);
       final response = await http.get(Uri.parse(
           'https://raw.githubusercontent.com/whoeverb/Trip_Companion/main/trips/index.json'));
       if (response.statusCode == 200) {
         await prefs.setString('index_cache', response.body);
+        await CacheService.set('index_cache', response.body);
         return _parseIndex(response.body);
       }
     } catch (e) {
@@ -112,10 +116,13 @@ class TripService {
     }
 
     try {
+      final cached = await CacheService.get(key);
+      if (cached != null) return _parseTrip(cached, meta.name, meta.file);
       final response = await http.get(Uri.parse(
           'https://raw.githubusercontent.com/whoeverb/Trip_Companion/main/trips/${meta.file}'));
       if (response.statusCode == 200) {
         await prefs.setString(key, response.body);
+        await CacheService.set(key, response.body);
         return _parseTrip(response.body, meta.name, meta.file);
       }
     } catch (e) {
