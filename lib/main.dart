@@ -178,8 +178,8 @@ class _TripListScreenState extends State<TripListScreen> {
               ),
             ),
           ),
-          Container(
-            color: Colors.transparent,
+          Material(
+            type: MaterialType.transparency,
             child: CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
