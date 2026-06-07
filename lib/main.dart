@@ -1695,6 +1695,14 @@ class _EventCardState extends State<_EventCard> {
     if (kIsWeb) return;
     final t = widget.event.type.toLowerCase();
     if (t.contains('transit')) return;
+
+    final cacheKey = 'transit_${widget.originAddress}_${widget.event.address}';
+    final cached = await CacheService.get(cacheKey);
+    if (cached != null) {
+      setState(() => _duration = cached);
+      return;
+    }
+
     const orsKey = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjhhMDM5ZTczYzRkMTQxY2Y4NmQzYTBjMzEzMDlhNjQzIiwiaCI6Im11cm11cjY0In0=';
     final String profile = t.contains('walking') ? 'foot-walking' : 'driving-car';
     try {
@@ -1730,8 +1738,13 @@ class _EventCardState extends State<_EventCard> {
         if (mounted) setState(() {
           _duration = durationText;
         });
+        await CacheService.set(cacheKey, durationText);
       }
     } catch (e) {
+      final stale = await CacheService.getStale(cacheKey);
+      if (stale != null) {
+        setState(() => _duration = stale);
+      }
     }
   }
 
