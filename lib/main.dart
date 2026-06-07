@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'trip_service.dart';
+import 'cache_service.dart';
 
 void main() => runApp(const TravelApp());
 
@@ -1098,6 +1099,14 @@ class _DayContentState extends State<_DayContent> with TickerProviderStateMixin 
 
     for (String loc in uniqueLocations) {
       String query = loc.split(',')[0].trim();
+      final cacheKey = 'weather_${loc}';
+      final cached = await CacheService.get(cacheKey);
+      if (cached != null) {
+        setState(() {
+          _weatherData.add(json.decode(cached));
+        });
+        continue;
+      }
       try {
         final geoUrl = Uri.parse('https://geocoding-api.open-meteo.com/v1/search?name=${Uri.encodeComponent(query)}&count=1&language=en&format=json');
         final geoResponse = await http.get(geoUrl);
@@ -1194,20 +1203,28 @@ class _DayContentState extends State<_DayContent> with TickerProviderStateMixin 
               final tempMin = (tempMinList![0] as num).toDouble();
               final code = codeList![0].toString();
 
+              final weatherMap = {
+                'city': city,
+                'country': country,
+                'tempMax': tempMax,
+                'tempMin': tempMin,
+                'code': code
+              };
+              await CacheService.set(cacheKey, json.encode(weatherMap));
               setState(() {
-                _weatherData.add({
-                  'city': city,
-                  'country': country,
-                  'tempMax': tempMax,
-                  'tempMin': tempMin,
-                  'code': code
-                });
+                _weatherData.add(weatherMap);
               });
             }
           }
         }
       } catch (e) {
         debugPrint('Weather error for $loc: $e');
+        final stale = await CacheService.getStale(cacheKey);
+        if (stale != null) {
+          setState(() {
+            _weatherData.add(json.decode(stale));
+          });
+        }
       }
     }
     if (mounted) setState(() => _weatherLoading = false);
