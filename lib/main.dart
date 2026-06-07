@@ -593,6 +593,13 @@ class _TripCardState extends State<_TripCard> {
     final queryParts = filtered.length > 2 ? filtered.sublist(filtered.length - 2) : filtered;
     final query = queryParts.isEmpty ? 'travel landscape' : queryParts.join(' ');
 
+    final cacheKey = 'image_${query}';
+    final cached = await CacheService.get(cacheKey);
+    if (cached != null) {
+      if (mounted) setState(() => _imageUrl = cached);
+      return;
+    }
+
     try {
       final url = Uri.parse('https://api.unsplash.com/search/photos?query=${Uri.encodeComponent(query)}&client_id=kBduwH2JVZAUVQ-Y_6gHJJJJguTjibCMy3GDis59FpY&per_page=1&orientation=landscape&content_filter=high&order_by=relevant');
       final response = await http.get(url);
@@ -600,6 +607,7 @@ class _TripCardState extends State<_TripCard> {
         final data = json.decode(response.body);
         if (data['results'] != null && (data['results'] as List).isNotEmpty) {
           if (mounted) setState(() => _imageUrl = data['results'][0]['urls']['regular']);
+          await CacheService.set(cacheKey, data['results'][0]['urls']['regular']);
         }
       }
     } catch (_) {}
@@ -838,6 +846,13 @@ class _ImageHeaderState extends State<_ImageHeader> {
     final queryParts = filtered.length > 2 ? filtered.sublist(filtered.length - 2) : filtered;
     final query = queryParts.isEmpty ? 'travel landscape' : queryParts.join(' ');
 
+    final cacheKey = 'image_${query}';
+    final cached = await CacheService.get(cacheKey);
+    if (cached != null) {
+      if (mounted) setState(() => _imageUrl = cached);
+      return;
+    }
+
     try {
       final url = Uri.parse('https://api.unsplash.com/search/photos?query=${Uri.encodeComponent(query)}&client_id=kBduwH2JVZAUVQ-Y_6gHJJJJguTjibCMy3GDis59FpY&per_page=1&orientation=landscape&content_filter=high&order_by=relevant');
       final response = await http.get(url);
@@ -845,6 +860,7 @@ class _ImageHeaderState extends State<_ImageHeader> {
         final data = json.decode(response.body);
         if (data['results'] != null && (data['results'] as List).isNotEmpty) {
           setState(() => _imageUrl = data['results'][0]['urls']['regular']);
+          await CacheService.set(cacheKey, data['results'][0]['urls']['regular']);
         }
       }
     } catch (_) {}
